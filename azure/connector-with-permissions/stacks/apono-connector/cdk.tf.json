@@ -134,7 +134,7 @@
       "type": "string"
     },
     "connectorId": {
-      "default": "connector-test-azure",
+      "default": "azure-connector",
       "type": "string"
     },
     "resourceGroup": {
