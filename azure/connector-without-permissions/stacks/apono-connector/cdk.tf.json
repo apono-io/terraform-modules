@@ -1,0 +1,108 @@
+{
+  "//": {
+    "metadata": {
+      "backend": "local",
+      "stackName": "apono-connector",
+      "version": "0.15.5"
+    },
+    "outputs": {
+    }
+  },
+  "data": {
+    "azurerm_subscription": {
+      "aponoconnector_azureSubscription_EC5B634C": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/azureSubscription",
+            "uniqueId": "aponoconnector_azureSubscription_EC5B634C"
+          }
+        }
+      }
+    }
+  },
+  "provider": {
+    "azuread": [
+      {
+      }
+    ],
+    "azurerm": [
+      {
+        "features": {
+        }
+      }
+    ]
+  },
+  "resource": {
+    "azurerm_container_group": {
+      "aponoconnector_container_DD010166": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/container",
+            "uniqueId": "aponoconnector_container_DD010166"
+          }
+        },
+        "container": [
+          {
+            "cpu": 1,
+            "environment_variables": {
+              "APONO_CONNECTOR_ID": "${var.connectorId}",
+              "APONO_TOKEN": "${var.aponoToken}",
+              "APONO_URL": "api.apono.io"
+            },
+            "image": "registry.apono.io/apono-connector:v1.3.4",
+            "memory": 1.5,
+            "name": "apono-connector",
+            "ports": [
+              {
+                "port": 80
+              }
+            ]
+          }
+        ],
+        "identity": {
+          "type": "SystemAssigned"
+        },
+        "image_registry_credential": [
+          {
+            "password": "${var.aponoToken}",
+            "server": "registry.apono.io",
+            "username": "apono"
+          }
+        ],
+        "location": "eastus",
+        "name": "apono-connector",
+        "os_type": "Linux",
+        "resource_group_name": "${var.resourceGroup}"
+      }
+    }
+  },
+  "terraform": {
+    "backend": {
+      "local": {
+        "path": "terraform.tfstate"
+      }
+    },
+    "required_providers": {
+      "azuread": {
+        "source": "hashicorp/azuread",
+        "version": "2.36.0"
+      },
+      "azurerm": {
+        "source": "azurerm",
+        "version": "3.48.0"
+      }
+    }
+  },
+  "variable": {
+    "aponoToken": {
+      "type": "string"
+    },
+    "connectorId": {
+      "default": "connector-test-azure",
+      "type": "string"
+    },
+    "resourceGroup": {
+      "type": "string"
+    }
+  }
+}

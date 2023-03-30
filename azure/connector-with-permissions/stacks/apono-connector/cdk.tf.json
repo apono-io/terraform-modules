@@ -1,0 +1,144 @@
+{
+  "//": {
+    "metadata": {
+      "backend": "local",
+      "stackName": "apono-connector",
+      "version": "0.15.5"
+    },
+    "outputs": {
+    }
+  },
+  "data": {
+    "azurerm_subscription": {
+      "aponoconnector_azureSubscription_EC5B634C": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/azureSubscription",
+            "uniqueId": "aponoconnector_azureSubscription_EC5B634C"
+          }
+        }
+      }
+    }
+  },
+  "provider": {
+    "azuread": [
+      {
+      }
+    ],
+    "azurerm": [
+      {
+        "features": {
+        }
+      }
+    ]
+  },
+  "resource": {
+    "azuread_directory_role": {
+      "aponoconnector_azureAdRole_247F9DC9": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/azureAdRole",
+            "uniqueId": "aponoconnector_azureAdRole_247F9DC9"
+          }
+        },
+        "display_name": "Directory Readers"
+      }
+    },
+    "azuread_directory_role_assignment": {
+      "aponoconnector_azureAdConnectorRoleAssignmentDirectoryReaders_9861965A": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/azureAdConnectorRoleAssignment_Directory Readers",
+            "uniqueId": "aponoconnector_azureAdConnectorRoleAssignmentDirectoryReaders_9861965A"
+          }
+        },
+        "principal_object_id": "${azurerm_container_group.aponoconnector_container_DD010166.identity[0].principal_id}",
+        "role_id": "${azuread_directory_role.aponoconnector_azureAdRole_247F9DC9.id}"
+      }
+    },
+    "azurerm_container_group": {
+      "aponoconnector_container_DD010166": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/container",
+            "uniqueId": "aponoconnector_container_DD010166"
+          }
+        },
+        "container": [
+          {
+            "cpu": 1,
+            "environment_variables": {
+              "APONO_CONNECTOR_ID": "${var.connectorId}",
+              "APONO_TOKEN": "${var.aponoToken}",
+              "APONO_URL": "api.apono.io"
+            },
+            "image": "registry.apono.io/apono-connector:v1.3.4",
+            "memory": 1.5,
+            "name": "apono-connector",
+            "ports": [
+              {
+                "port": 80
+              }
+            ]
+          }
+        ],
+        "identity": {
+          "type": "SystemAssigned"
+        },
+        "image_registry_credential": [
+          {
+            "password": "${var.aponoToken}",
+            "server": "registry.apono.io",
+            "username": "apono"
+          }
+        ],
+        "location": "eastus",
+        "name": "apono-connector",
+        "os_type": "Linux",
+        "resource_group_name": "${var.resourceGroup}"
+      }
+    },
+    "azurerm_role_assignment": {
+      "aponoconnector_connectorRoleAssignmentUserAccessAdministrator_E22EC141": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/connectorRoleAssignment_User Access Administrator",
+            "uniqueId": "aponoconnector_connectorRoleAssignmentUserAccessAdministrator_E22EC141"
+          }
+        },
+        "principal_id": "${azurerm_container_group.aponoconnector_container_DD010166.identity[0].principal_id}",
+        "role_definition_name": "User Access Administrator",
+        "scope": "${data.azurerm_subscription.aponoconnector_azureSubscription_EC5B634C.id}"
+      }
+    }
+  },
+  "terraform": {
+    "backend": {
+      "local": {
+        "path": "terraform.tfstate"
+      }
+    },
+    "required_providers": {
+      "azuread": {
+        "source": "hashicorp/azuread",
+        "version": "2.36.0"
+      },
+      "azurerm": {
+        "source": "azurerm",
+        "version": "3.48.0"
+      }
+    }
+  },
+  "variable": {
+    "aponoToken": {
+      "type": "string"
+    },
+    "connectorId": {
+      "default": "connector-test-azure",
+      "type": "string"
+    },
+    "resourceGroup": {
+      "type": "string"
+    }
+  }
+}
