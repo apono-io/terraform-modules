@@ -1,0 +1,13 @@
+{
+  "version": "0.15.5",
+  "stacks": {
+    "apono-connector": {
+      "name": "apono-connector",
+      "constructPath": "apono-connector",
+      "workingDirectory": "stacks/apono-connector",
+      "synthesizedStackPath": "stacks/apono-connector/cdk.tf.json",
+      "annotations": [],
+      "dependencies": []
+    }
+  }
+}
