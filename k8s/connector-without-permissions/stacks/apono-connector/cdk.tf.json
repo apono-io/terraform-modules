@@ -45,7 +45,7 @@
           },
           {
             "name": "image.tag",
-            "value": "v1.3.4"
+            "value": "v1.3.5"
           },
           {
             "name": "serviceAccount.manageClusterRoles",
