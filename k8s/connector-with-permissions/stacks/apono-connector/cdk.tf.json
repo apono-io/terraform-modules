@@ -3,18 +3,18 @@
     "metadata": {
       "backend": "local",
       "stackName": "apono-connector",
-      "version": "0.15.5"
+      "version": "0.19.2"
     },
     "outputs": {
     }
   },
   "resource": {
     "helm_release": {
-      "aponoconnector_connectorHelmChart_A7EC929F": {
+      "connectorHelmChart": {
         "//": {
           "metadata": {
             "path": "apono-connector/connectorHelmChart",
-            "uniqueId": "aponoconnector_connectorHelmChart_A7EC929F"
+            "uniqueId": "connectorHelmChart"
           }
         },
         "chart": "apono-connector",
@@ -45,7 +45,7 @@
           },
           {
             "name": "image.tag",
-            "value": "v1.5.1"
+            "value": "v1.5.3"
           },
           {
             "name": "serviceAccount.manageClusterRoles",

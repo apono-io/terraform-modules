@@ -3,29 +3,29 @@
     "metadata": {
       "backend": "local",
       "stackName": "apono-connector",
-      "version": "0.15.5"
+      "version": "0.19.2"
     },
     "outputs": {
     }
   },
   "data": {
     "azurerm_resource_group": {
-      "aponoconnector_azureResourceGroup_D35D4651": {
+      "azureResourceGroup": {
         "//": {
           "metadata": {
             "path": "apono-connector/azureResourceGroup",
-            "uniqueId": "aponoconnector_azureResourceGroup_D35D4651"
+            "uniqueId": "azureResourceGroup"
           }
         },
         "name": "${var.resourceGroup}"
       }
     },
     "azurerm_subscription": {
-      "aponoconnector_azureSubscription_EC5B634C": {
+      "azureSubscription": {
         "//": {
           "metadata": {
             "path": "apono-connector/azureSubscription",
-            "uniqueId": "aponoconnector_azureSubscription_EC5B634C"
+            "uniqueId": "azureSubscription"
           }
         }
       }
@@ -33,34 +33,34 @@
   },
   "resource": {
     "azuread_directory_role": {
-      "aponoconnector_azureAdRole_247F9DC9": {
+      "azureAdRole": {
         "//": {
           "metadata": {
             "path": "apono-connector/azureAdRole",
-            "uniqueId": "aponoconnector_azureAdRole_247F9DC9"
+            "uniqueId": "azureAdRole"
           }
         },
         "display_name": "Directory Readers"
       }
     },
     "azuread_directory_role_assignment": {
-      "aponoconnector_azureAdConnectorRoleAssignmentDirectoryReaders_9861965A": {
+      "azureAdConnectorRoleAssignment_DirectoryReaders": {
         "//": {
           "metadata": {
             "path": "apono-connector/azureAdConnectorRoleAssignment_Directory Readers",
-            "uniqueId": "aponoconnector_azureAdConnectorRoleAssignmentDirectoryReaders_9861965A"
+            "uniqueId": "azureAdConnectorRoleAssignment_DirectoryReaders"
           }
         },
-        "principal_object_id": "${azurerm_container_group.aponoconnector_container_DD010166.identity[0].principal_id}",
-        "role_id": "${azuread_directory_role.aponoconnector_azureAdRole_247F9DC9.id}"
+        "principal_object_id": "${azurerm_container_group.container.identity[0].principal_id}",
+        "role_id": "${azuread_directory_role.azureAdRole.id}"
       }
     },
     "azurerm_container_group": {
-      "aponoconnector_container_DD010166": {
+      "container": {
         "//": {
           "metadata": {
             "path": "apono-connector/container",
-            "uniqueId": "aponoconnector_container_DD010166"
+            "uniqueId": "container"
           }
         },
         "container": [
@@ -70,9 +70,9 @@
               "APONO_CONNECTOR_ID": "${var.connectorId}",
               "APONO_TOKEN": "${var.aponoToken}",
               "APONO_URL": "api.apono.io",
-              "CONNECTOR_METADATA": "{\"cloud_provider\":\"AZURE\",\"subscription_id\":\"${data.azurerm_subscription.aponoconnector_azureSubscription_EC5B634C.subscription_id}\",\"resource_group\":\"${var.resourceGroup}\",\"region\":\"${data.azurerm_resource_group.aponoconnector_azureResourceGroup_D35D4651.location}\",\"is_azure_admin\":true}"
+              "CONNECTOR_METADATA": "{\"cloud_provider\":\"AZURE\",\"subscription_id\":\"${data.azurerm_subscription.azureSubscription.subscription_id}\",\"resource_group\":\"${var.resourceGroup}\",\"region\":\"${data.azurerm_resource_group.azureResourceGroup.location}\",\"is_azure_admin\":true}"
             },
-            "image": "registry.apono.io/apono-connector:v1.5.1",
+            "image": "registry.apono.io/apono-connector:v1.5.3",
             "memory": 1.5,
             "name": "apono-connector",
             "ports": [
@@ -93,7 +93,7 @@
           }
         ],
         "ip_address_type": "${var.ipAddressType}",
-        "location": "${data.azurerm_resource_group.aponoconnector_azureResourceGroup_D35D4651.location}",
+        "location": "${data.azurerm_resource_group.azureResourceGroup.location}",
         "name": "${var.connectorId}",
         "os_type": "Linux",
         "resource_group_name": "${var.resourceGroup}",
@@ -101,16 +101,16 @@
       }
     },
     "azurerm_role_assignment": {
-      "aponoconnector_connectorRoleAssignmentUserAccessAdministrator_E22EC141": {
+      "connectorRoleAssignment_UserAccessAdministrator": {
         "//": {
           "metadata": {
             "path": "apono-connector/connectorRoleAssignment_User Access Administrator",
-            "uniqueId": "aponoconnector_connectorRoleAssignmentUserAccessAdministrator_E22EC141"
+            "uniqueId": "connectorRoleAssignment_UserAccessAdministrator"
           }
         },
-        "principal_id": "${azurerm_container_group.aponoconnector_container_DD010166.identity[0].principal_id}",
+        "principal_id": "${azurerm_container_group.container.identity[0].principal_id}",
         "role_definition_name": "User Access Administrator",
-        "scope": "${data.azurerm_subscription.aponoconnector_azureSubscription_EC5B634C.id}"
+        "scope": "${data.azurerm_subscription.azureSubscription.id}"
       }
     }
   },
