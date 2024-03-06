@@ -6,6 +6,9 @@
       "version": "0.19.2"
     },
     "outputs": {
+      "apono-connector": {
+        "connector_role_arn": "connector_role_arn"
+      }
     }
   },
   "data": {
@@ -18,6 +21,11 @@
           }
         }
       }
+    }
+  },
+  "output": {
+    "connector_role_arn": {
+      "value": "${aws_iam_role.IAMRole.arn}"
     }
   },
   "resource": {
