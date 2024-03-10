@@ -178,6 +178,10 @@
           {
             "name": "sso-policy",
             "policy": "{\"Statement\":[{\"Action\":[\"organizations:ListAccounts\",\"tag:GetResources\",\"tag:GetTagValues\",\"sso:ListInstances\",\"identitystore:*\",\"tag:GetTagKeys\",\"sso:TagResource\"],\"Effect\":\"Allow\",\"Resource\":\"*\",\"Sid\":\"sso0\"},{\"Action\":[\"organizations:ListAccountsForParent\",\"sso:ListPermissionSets\",\"sso:CreateAccountAssignment\",\"sso:DescribeAccountAssignmentCreationStatus\",\"organizations:ListParents\",\"sso:DeleteAccountAssignment\",\"sso:DescribePermissionSet\",\"organizations:ListChildren\",\"sso:DescribeAccountAssignmentDeletionStatus\",\"sso:DeletePermissionSet\",\"sso:CreatePermissionSet\",\"sso:PutInlinePolicyToPermissionSet\",\"iam:GetSAMLProvider\",\"sso:GetInlinePolicyForPermissionSet\",\"sso:DeleteInlinePolicyFromPermissionSet\",\"sso:ProvisionPermissionSet\"],\"Effect\":\"Allow\",\"Resource\":[\"arn:aws:organizations::*:root/o-*/r-*\",\"arn:aws:organizations::*:ou/o-*/ou-*\",\"arn:aws:sso:::instance/*\",\"arn:aws:sso:::permissionSet/*/*\",\"arn:aws:sso:::account/*\",\"arn:aws:iam::*:saml-provider/*\"],\"Sid\":\"sso1\"}],\"Version\":\"2012-10-17\"}"
+          },
+          {
+            "name": "rds-connect",
+            "policy": "{\"Statement\":[{\"Action\":\"rds-db:connect\",\"Effect\":\"Allow\",\"Resource\":\"arn:aws:rds-db:*:*:dbuser:*/apono-connector\"}],\"Version\":\"2012-10-17\"}"
           }
         ],
         "managed_policy_arns": [
