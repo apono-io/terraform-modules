@@ -181,7 +181,7 @@
           },
           {
             "name": "rds-connect",
-            "policy": "{\"Statement\":[{\"Action\":\"rds-db:connect\",\"Effect\":\"Allow\",\"Resource\":\"arn:aws:rds-db:*:*:dbuser:*/apono-connector\"}],\"Version\":\"2012-10-17\"}"
+            "policy": "{\"Statement\":[{\"Action\":\"rds-db:connect\",\"Effect\":\"Allow\",\"Resource\":\"arn:aws:rds-db:*:*:dbuser:*/apono_connector\"}],\"Version\":\"2012-10-17\"}"
           }
         ],
         "managed_policy_arns": [
