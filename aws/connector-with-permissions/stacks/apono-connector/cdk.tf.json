@@ -38,7 +38,8 @@
           }
         },
         "name": "/ecs/apono-connector-logs-${random_id.stackId.id}",
-        "retention_in_days": 30
+        "retention_in_days": 30,
+        "tags": "${var.tags}"
       }
     },
     "aws_ecs_cluster": {
@@ -49,7 +50,8 @@
             "uniqueId": "ECSCluster"
           }
         },
-        "name": "apono-connector-ecscluster-${random_id.stackId.id}"
+        "name": "apono-connector-ecscluster-${random_id.stackId.id}",
+        "tags": "${var.tags}"
       }
     },
     "aws_ecs_cluster_capacity_providers": {
@@ -94,6 +96,7 @@
         },
         "platform_version": "LATEST",
         "scheduling_strategy": "REPLICA",
+        "tags": "${var.tags}",
         "task_definition": "${aws_ecs_task_definition.ECSTaskDefinition.arn}"
       }
     },
@@ -114,6 +117,7 @@
         "requires_compatibilities": [
           "FARGATE"
         ],
+        "tags": "${var.tags}",
         "task_role_arn": "${aws_iam_role.IAMRole.arn}"
       }
     },
@@ -181,7 +185,7 @@
           },
           {
             "name": "sso-policy",
-            "policy": "{\"Statement\":[{\"Action\":[\"organizations:ListAccounts\",\"tag:GetResources\",\"tag:GetTagValues\",\"sso:ListInstances\",\"identitystore:*\",\"tag:GetTagKeys\",\"sso:TagResource\"],\"Effect\":\"Allow\",\"Resource\":\"*\",\"Sid\":\"sso0\"},{\"Action\":[\"organizations:ListAccountsForParent\",\"sso:ListPermissionSets\",\"sso:CreateAccountAssignment\",\"sso:DescribeAccountAssignmentCreationStatus\",\"organizations:ListParents\",\"sso:DeleteAccountAssignment\",\"sso:DescribePermissionSet\",\"organizations:ListChildren\",\"sso:DescribeAccountAssignmentDeletionStatus\",\"sso:DeletePermissionSet\",\"sso:CreatePermissionSet\",\"sso:PutInlinePolicyToPermissionSet\",\"iam:GetSAMLProvider\",\"sso:GetInlinePolicyForPermissionSet\",\"sso:DeleteInlinePolicyFromPermissionSet\",\"sso:ProvisionPermissionSet\",\"sso:AttachManagedPolicyToPermissionSet\",\"sso:DetachManagedPolicyFromPermissionSet\",\"sso:ListManagedPoliciesInPermissionSet\"],\"Effect\":\"Allow\",\"Resource\":[\"arn:aws:organizations::*:root/o-*/r-*\",\"arn:aws:organizations::*:ou/o-*/ou-*\",\"arn:aws:sso:::instance/*\",\"arn:aws:sso:::permissionSet/*/*\",\"arn:aws:sso:::account/*\",\"arn:aws:iam::*:saml-provider/*\"],\"Sid\":\"sso1\"}],\"Version\":\"2012-10-17\"}"
+            "policy": "{\"Statement\":[{\"Action\":[\"organizations:ListAccounts\",\"tag:GetResources\",\"tag:GetTagValues\",\"sso:ListInstances\",\"identitystore:*\",\"tag:GetTagKeys\",\"sso:TagResource\"],\"Effect\":\"Allow\",\"Resource\":\"*\",\"Sid\":\"sso0\"},{\"Action\":[\"organizations:ListAccountsForParent\",\"sso:ListPermissionSets\",\"sso:CreateAccountAssignment\",\"sso:DescribeAccountAssignmentCreationStatus\",\"organizations:ListParents\",\"sso:DeleteAccountAssignment\",\"sso:DescribePermissionSet\",\"organizations:ListChildren\",\"sso:DescribeAccountAssignmentDeletionStatus\",\"sso:DeletePermissionSet\",\"sso:CreatePermissionSet\",\"sso:PutInlinePolicyToPermissionSet\",\"iam:CreateSAMLProvider\",\"iam:UpdateSAMLProvider\",\"iam:GetSAMLProvider\",\"sso:GetInlinePolicyForPermissionSet\",\"sso:DeleteInlinePolicyFromPermissionSet\",\"sso:ProvisionPermissionSet\",\"sso:AttachManagedPolicyToPermissionSet\",\"sso:DetachManagedPolicyFromPermissionSet\",\"sso:ListManagedPoliciesInPermissionSet\"],\"Effect\":\"Allow\",\"Resource\":[\"arn:aws:organizations::*:root/o-*/r-*\",\"arn:aws:organizations::*:ou/o-*/ou-*\",\"arn:aws:sso:::instance/*\",\"arn:aws:sso:::permissionSet/*/*\",\"arn:aws:sso:::account/*\",\"arn:aws:iam::*:saml-provider/*\"],\"Sid\":\"sso1\"}],\"Version\":\"2012-10-17\"}"
           },
           {
             "name": "rds-connect",
@@ -194,7 +198,8 @@
         ],
         "max_session_duration": 3600,
         "name": "apono-connector-role-${random_id.stackId.id}",
-        "path": "/"
+        "path": "/",
+        "tags": "${var.tags}"
       }
     },
     "aws_secretsmanager_secret": {
@@ -207,9 +212,7 @@
         },
         "description": "Apono Connector docker registry credentials",
         "name": "apono-connector-registry-credentials-${random_id.stackId.id}",
-        "tags": {
-          "apono-connector-read": "true"
-        }
+        "tags": "${merge(var.tags, {\"apono-connector-read\" = \"true\"})}"
       }
     },
     "aws_secretsmanager_secret_version": {
@@ -248,6 +251,7 @@
           }
         ],
         "name": "apono-connector-sg-${random_id.stackId.id}",
+        "tags": "${var.tags}",
         "vpc_id": "${var.vpcId}"
       }
     },
@@ -297,6 +301,14 @@
     "subnetIds": [
       {
         "type": "list"
+      }
+    ],
+    "tags": [
+      {
+        "default": {
+        },
+        "description": "Map of tags for the created resources",
+        "type": "map(string)"
       }
     ],
     "vpcId": [

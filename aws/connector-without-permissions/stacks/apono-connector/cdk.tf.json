@@ -38,7 +38,8 @@
           }
         },
         "name": "/ecs/apono-connector-logs-${random_id.stackId.id}",
-        "retention_in_days": 30
+        "retention_in_days": 30,
+        "tags": "${var.tags}"
       }
     },
     "aws_ecs_cluster": {
@@ -49,7 +50,8 @@
             "uniqueId": "ECSCluster"
           }
         },
-        "name": "apono-connector-ecscluster-${random_id.stackId.id}"
+        "name": "apono-connector-ecscluster-${random_id.stackId.id}",
+        "tags": "${var.tags}"
       }
     },
     "aws_ecs_cluster_capacity_providers": {
@@ -94,6 +96,7 @@
         },
         "platform_version": "LATEST",
         "scheduling_strategy": "REPLICA",
+        "tags": "${var.tags}",
         "task_definition": "${aws_ecs_task_definition.ECSTaskDefinition.arn}"
       }
     },
@@ -114,6 +117,7 @@
         "requires_compatibilities": [
           "FARGATE"
         ],
+        "tags": "${var.tags}",
         "task_role_arn": "${aws_iam_role.IAMRole.arn}"
       }
     },
@@ -153,7 +157,8 @@
         ],
         "max_session_duration": 3600,
         "name": "apono-connector-role-${random_id.stackId.id}",
-        "path": "/"
+        "path": "/",
+        "tags": "${var.tags}"
       }
     },
     "aws_secretsmanager_secret": {
@@ -166,9 +171,7 @@
         },
         "description": "Apono Connector docker registry credentials",
         "name": "apono-connector-registry-credentials-${random_id.stackId.id}",
-        "tags": {
-          "apono-connector-read": "true"
-        }
+        "tags": "${merge(var.tags, {\"apono-connector-read\" = \"true\"})}"
       }
     },
     "aws_secretsmanager_secret_version": {
@@ -207,6 +210,7 @@
           }
         ],
         "name": "apono-connector-sg-${random_id.stackId.id}",
+        "tags": "${var.tags}",
         "vpc_id": "${var.vpcId}"
       }
     },
@@ -256,6 +260,14 @@
     "subnetIds": [
       {
         "type": "list"
+      }
+    ],
+    "tags": [
+      {
+        "default": {
+        },
+        "description": "Map of tags for the created resources",
+        "type": "map(string)"
       }
     ],
     "vpcId": [
