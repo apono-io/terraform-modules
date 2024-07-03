@@ -1,0 +1,71 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        required: false
+        description: 'Manual Tag'
+  push:
+    branches: [main]
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set release tag from manual input
+        if: github.event_name == 'workflow_dispatch' && inputs.tag
+        run: echo "next_version=${{ inputs.tag }}" >> $GITHUB_ENV
+
+      - name: Get latest release tag
+        id: get_latest_release
+        if: github.event_name == 'push'
+        run: |
+          latest_tag=$(gh release view --json tagName -q .tagName)
+          echo "Latest tag: $latest_tag"
+          echo "latest_tag=$latest_tag" >> $GITHUB_ENV
+
+      - name: Extract version parts and calculate next minor version
+        id: extract_version
+        if: github.event_name == 'push'
+        run: |
+          latest_tag=${{ env.latest_tag }}
+          latest_tag=${latest_tag#v} # Remove leading 'v'
+          IFS='.' read -r -a version_parts <<< "$latest_tag"
+          major=${version_parts[0]}
+          minor=${version_parts[1]}
+          patch=${version_parts[2]}
+          echo "Major: $major, Minor: $minor, Patch: $patch"
+          
+          next_patch=$((patch + 1))
+          next_version="v${major}.${minor}.${next_patch}"
+          
+          echo "Next version: $next_version"
+          echo "next_version=$next_version" >> $GITHUB_ENV
+
+      - name: Print next version
+        run: |
+          echo "The next minor version is: ${{ env.next_version }}"
+
+      - name: Validate tag format
+        run: |
+          if [[ ! ${{ env.next_version }} =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid tag format: ${{ env.next_version }}"
+            exit 1
+          fi
+
+      - name: Create release
+        env:
+          tag: ${{ env.next_version}}
+        run: |
+          gh release create "$tag" \
+              --repo="$GITHUB_REPOSITORY" \
+              --title="${tag}" \
+              --notes "Release ${tag}"
