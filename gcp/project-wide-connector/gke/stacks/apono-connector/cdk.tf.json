@@ -1,0 +1,172 @@
+{
+  "//": {
+    "metadata": {
+      "backend": "local",
+      "stackName": "apono-connector",
+      "version": "0.20.8"
+    },
+    "outputs": {
+    }
+  },
+  "resource": {
+    "google_project_iam_binding": {
+      "service-account-project-iam-binding-roles--browser": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/service-account-project-iam-binding-roles--browser",
+            "uniqueId": "service-account-project-iam-binding-roles--browser"
+          }
+        },
+        "members": [
+          "serviceAccount:${var.serviceAccountName}@${var.projectId}.iam.gserviceaccount.com"
+        ],
+        "project": "${var.projectId}",
+        "role": "roles/roles/browser"
+      },
+      "service-account-project-iam-binding-roles--iamsecurityAdmin": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/service-account-project-iam-binding-roles--iam.securityAdmin",
+            "uniqueId": "service-account-project-iam-binding-roles--iamsecurityAdmin"
+          }
+        },
+        "members": [
+          "serviceAccount:${var.serviceAccountName}@${var.projectId}.iam.gserviceaccount.com"
+        ],
+        "project": "${var.projectId}",
+        "role": "roles/roles/iam.securityAdmin"
+      },
+      "service-account-project-iam-binding-roles--resourcemanagertagViewer": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/service-account-project-iam-binding-roles--resourcemanager.tagViewer",
+            "uniqueId": "service-account-project-iam-binding-roles--resourcemanagertagViewer"
+          }
+        },
+        "members": [
+          "serviceAccount:${var.serviceAccountName}@${var.projectId}.iam.gserviceaccount.com"
+        ],
+        "project": "${var.projectId}",
+        "role": "roles/roles/resourcemanager.tagViewer"
+      }
+    },
+    "google_service_account": {
+      "service-account": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/service-account",
+            "uniqueId": "service-account"
+          }
+        },
+        "account_id": "${var.serviceAccountName}",
+        "project": "${var.projectId}"
+      }
+    },
+    "google_service_account_iam_binding": {
+      "k8s-service-account-iam-binding": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/k8s-service-account-iam-binding",
+            "uniqueId": "k8s-service-account-iam-binding"
+          }
+        },
+        "members": [
+          "serviceAccount:${var.projectId}.svc.id.goog[${var.namespace}/apono-connector-service-account]"
+        ],
+        "role": "roles/iam.workloadIdentityUser",
+        "service_account_id": "projects/${var.projectId}/serviceAccounts/${var.serviceAccountName}@${var.projectId}.iam.gserviceaccount.com"
+      }
+    },
+    "helm_release": {
+      "connectorHelmChart": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/connectorHelmChart",
+            "uniqueId": "connectorHelmChart"
+          }
+        },
+        "chart": "apono-connector",
+        "create_namespace": true,
+        "name": "apono-connector",
+        "namespace": "${var.namespace}",
+        "repository": "https://apono-io.github.io/apono-helm-charts/",
+        "set": [
+          {
+            "name": "apono.token",
+            "value": "${var.aponoToken}"
+          },
+          {
+            "name": "apono.connectorId",
+            "value": "${var.connectorId}"
+          },
+          {
+            "name": "apono.url",
+            "value": "api.apono.io"
+          },
+          {
+            "name": "image.registry",
+            "value": "registry.apono.io"
+          },
+          {
+            "name": "image.name",
+            "value": "apono-connector"
+          },
+          {
+            "name": "image.tag",
+            "value": "v1.6.4"
+          },
+          {
+            "name": "serviceAccount.manageClusterRoles",
+            "value": "true"
+          },
+          {
+            "name": "serviceAccount.gcpServiceAccountEmail",
+            "value": "${var.serviceAccountName}@${var.projectId}.iam.gserviceaccount.com"
+          }
+        ]
+      }
+    }
+  },
+  "terraform": {
+    "required_providers": {
+      "google": {
+        "source": "google",
+        "version": "~> 5.0"
+      },
+      "helm": {
+        "source": "helm",
+        "version": "~> 2.3"
+      }
+    }
+  },
+  "variable": {
+    "aponoToken": [
+      {
+        "type": "string"
+      }
+    ],
+    "connectorId": [
+      {
+        "default": "apono-connector",
+        "type": "string"
+      }
+    ],
+    "namespace": [
+      {
+        "default": "apono-connector-namespace",
+        "type": "string"
+      }
+    ],
+    "projectId": [
+      {
+        "type": "string"
+      }
+    ],
+    "serviceAccountName": [
+      {
+        "default": "apono-connector-iam-sa",
+        "type": "string"
+      }
+    ]
+  }
+}

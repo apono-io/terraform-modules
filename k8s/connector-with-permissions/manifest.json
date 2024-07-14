@@ -1,13 +1,16 @@
 {
-  "version": "0.19.2",
   "stacks": {
     "apono-connector": {
-      "name": "apono-connector",
+      "annotations": [
+      ],
       "constructPath": "apono-connector",
-      "workingDirectory": "stacks/apono-connector",
+      "dependencies": [
+      ],
+      "name": "apono-connector",
+      "stackMetadataPath": "stacks/apono-connector/metadata.json",
       "synthesizedStackPath": "stacks/apono-connector/cdk.tf.json",
-      "annotations": [],
-      "dependencies": []
+      "workingDirectory": "stacks/apono-connector"
     }
-  }
+  },
+  "version": "0.20.8"
 }
