@@ -52,7 +52,7 @@
           }
         },
         "principal_object_id": "${azurerm_container_group.container.identity[0].principal_id}",
-        "role_id": "${azuread_directory_role.azureAdRole.id}"
+        "role_id": "${azuread_directory_role.azureAdRole.template_id}"
       }
     },
     "azurerm_container_group": {
