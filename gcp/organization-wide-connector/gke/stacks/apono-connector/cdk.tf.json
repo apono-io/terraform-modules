@@ -10,44 +10,44 @@
   },
   "resource": {
     "google_organization_iam_binding": {
-      "service-account-organization-iam-binding-roles--browser": {
+      "service-account-organization-iam-binding-browser": {
         "//": {
           "metadata": {
-            "path": "apono-connector/service-account-organization-iam-binding-roles--browser",
-            "uniqueId": "service-account-organization-iam-binding-roles--browser"
+            "path": "apono-connector/service-account-organization-iam-binding-browser",
+            "uniqueId": "service-account-organization-iam-binding-browser"
           }
         },
         "members": [
           "serviceAccount:${var.serviceAccountName}@${var.projectId}.iam.gserviceaccount.com"
         ],
         "org_id": "${var.organizationId}",
-        "role": "roles/roles/browser"
+        "role": "roles/browser"
       },
-      "service-account-organization-iam-binding-roles--iamsecurityAdmin": {
+      "service-account-organization-iam-binding-iamsecurityAdmin": {
         "//": {
           "metadata": {
-            "path": "apono-connector/service-account-organization-iam-binding-roles--iam.securityAdmin",
-            "uniqueId": "service-account-organization-iam-binding-roles--iamsecurityAdmin"
+            "path": "apono-connector/service-account-organization-iam-binding-iam.securityAdmin",
+            "uniqueId": "service-account-organization-iam-binding-iamsecurityAdmin"
           }
         },
         "members": [
           "serviceAccount:${var.serviceAccountName}@${var.projectId}.iam.gserviceaccount.com"
         ],
         "org_id": "${var.organizationId}",
-        "role": "roles/roles/iam.securityAdmin"
+        "role": "roles/iam.securityAdmin"
       },
-      "service-account-organization-iam-binding-roles--resourcemanagertagViewer": {
+      "service-account-organization-iam-binding-resourcemanagertagViewer": {
         "//": {
           "metadata": {
-            "path": "apono-connector/service-account-organization-iam-binding-roles--resourcemanager.tagViewer",
-            "uniqueId": "service-account-organization-iam-binding-roles--resourcemanagertagViewer"
+            "path": "apono-connector/service-account-organization-iam-binding-resourcemanager.tagViewer",
+            "uniqueId": "service-account-organization-iam-binding-resourcemanagertagViewer"
           }
         },
         "members": [
           "serviceAccount:${var.serviceAccountName}@${var.projectId}.iam.gserviceaccount.com"
         ],
         "org_id": "${var.organizationId}",
-        "role": "roles/roles/resourcemanager.tagViewer"
+        "role": "roles/resourcemanager.tagViewer"
       }
     },
     "google_service_account": {
