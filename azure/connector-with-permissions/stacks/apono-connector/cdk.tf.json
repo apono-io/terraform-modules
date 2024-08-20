@@ -72,7 +72,7 @@
               "APONO_URL": "api.apono.io",
               "CONNECTOR_METADATA": "{\"cloud_provider\":\"AZURE\",\"subscription_id\":\"${data.azurerm_subscription.azureSubscription.subscription_id}\",\"resource_group\":\"${var.resourceGroup}\",\"region\":\"${data.azurerm_resource_group.azureResourceGroup.location}\",\"is_azure_admin\":true}"
             },
-            "image": "registry.apono.io/apono-connector:v1.6.5",
+            "image": "registry.apono.io/apono-connector:v1.6.6",
             "memory": 1.5,
             "name": "apono-connector",
             "ports": [
