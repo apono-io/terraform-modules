@@ -3,9 +3,12 @@
     "metadata": {
       "backend": "local",
       "stackName": "apono-connector",
-      "version": "0.20.9"
+      "version": "0.20.10"
     },
     "outputs": {
+      "apono-connector": {
+        "principal_id": "principal_id"
+      }
     }
   },
   "data": {
@@ -31,6 +34,11 @@
       }
     }
   },
+  "output": {
+    "principal_id": {
+      "value": "${azurerm_container_group.container.identity[0].principal_id}"
+    }
+  },
   "resource": {
     "azurerm_container_group": {
       "container": {
@@ -50,6 +58,17 @@
               "CONNECTOR_METADATA": "{\"cloud_provider\":\"AZURE\",\"subscription_id\":\"${data.azurerm_subscription.azureSubscription.subscription_id}\",\"resource_group\":\"${var.resourceGroup}\",\"region\":\"${data.azurerm_resource_group.azureResourceGroup.location}\",\"is_azure_admin\":false}"
             },
             "image": "registry.apono.io/apono-connector:v1.6.7",
+            "liveness_probe": {
+              "failure_threshold": 3,
+              "http_get": [
+                {
+                  "path": "/healthz",
+                  "port": 8080
+                }
+              ],
+              "initial_delay_seconds": 30,
+              "period_seconds": 30
+            },
             "memory": 1.5,
             "name": "apono-connector",
             "ports": [
