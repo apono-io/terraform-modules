@@ -86,7 +86,8 @@
               "http_get": [
                 {
                   "path": "/healthz",
-                  "port": 8080
+                  "port": 8080,
+                  "scheme": "http"
                 }
               ],
               "initial_delay_seconds": 30,
