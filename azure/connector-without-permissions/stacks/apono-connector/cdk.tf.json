@@ -80,7 +80,8 @@
           }
         ],
         "identity": {
-          "type": "SystemAssigned"
+          "identity_ids": "${var.identityIds}",
+          "type": "${var.identityType}"
         },
         "image_registry_credential": [
           {
@@ -119,6 +120,19 @@
     "connectorId": [
       {
         "default": "apono-connector",
+        "type": "string"
+      }
+    ],
+    "identityIds": [
+      {
+        "default": [
+        ],
+        "type": "list"
+      }
+    ],
+    "identityType": [
+      {
+        "default": "SystemAssigned",
         "type": "string"
       }
     ],
