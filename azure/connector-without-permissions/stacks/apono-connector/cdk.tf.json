@@ -7,6 +7,7 @@
     },
     "outputs": {
       "apono-connector": {
+        "log_analytics_workspace_id": "log_analytics_workspace_id",
         "principal_id": "principal_id"
       }
     }
@@ -35,6 +36,9 @@
     }
   },
   "output": {
+    "log_analytics_workspace_id": {
+      "value": "${azurerm_log_analytics_workspace.logAnalyticsWorkspace.workspace_id}"
+    },
     "principal_id": {
       "value": "${azurerm_container_group.container.identity[0].principal_id}"
     }
@@ -79,6 +83,12 @@
             ]
           }
         ],
+        "diagnostics": {
+          "log_analytics": {
+            "workspace_id": "${azurerm_log_analytics_workspace.logAnalyticsWorkspace.workspace_id}",
+            "workspace_key": "${azurerm_log_analytics_workspace.logAnalyticsWorkspace.primary_shared_key}"
+          }
+        },
         "identity": {
           "identity_ids": "${var.identityIds}",
           "type": "${var.identityType}"
@@ -92,10 +102,36 @@
         ],
         "ip_address_type": "${var.ipAddressType}",
         "location": "${data.azurerm_resource_group.azureResourceGroup.location}",
-        "name": "${var.connectorId}",
+        "name": "apono-${var.connectorId}-${random_id.stackId.hex}",
         "os_type": "Linux",
         "resource_group_name": "${var.resourceGroup}",
         "subnet_ids": "${var.subnetIds}"
+      }
+    },
+    "azurerm_log_analytics_workspace": {
+      "logAnalyticsWorkspace": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/logAnalyticsWorkspace",
+            "uniqueId": "logAnalyticsWorkspace"
+          }
+        },
+        "location": "${data.azurerm_resource_group.azureResourceGroup.location}",
+        "name": "apono-${var.connectorId}-${random_id.stackId.hex}",
+        "resource_group_name": "${var.resourceGroup}",
+        "retention_in_days": 30,
+        "sku": "PerGB2018"
+      }
+    },
+    "random_id": {
+      "stackId": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/stackId",
+            "uniqueId": "stackId"
+          }
+        },
+        "byte_length": 2
       }
     }
   },
@@ -108,6 +144,10 @@
       "azurerm": {
         "source": "azurerm",
         "version": "~> 3.10"
+      },
+      "random": {
+        "source": "hashicorp/random",
+        "version": "~> 3.1"
       }
     }
   },
