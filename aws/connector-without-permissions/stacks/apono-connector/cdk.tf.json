@@ -150,6 +150,10 @@
           {
             "name": "apono-cloudtrail-logs-s3-access-policy",
             "policy": "{\"Statement\":[{\"Action\":\"s3:GetObject\",\"Effect\":\"Allow\",\"Resource\":\"arn:aws:s3:::aws-cloudtrail-logs-apono-*/*\"}],\"Version\":\"2012-10-17\"}"
+          },
+          {
+            "name": "apono-additional-custom-policy",
+            "policy": "${var.additional_iam_policy}"
           }
         ],
         "managed_policy_arns": [
@@ -273,6 +277,13 @@
     "vpcId": [
       {
         "type": "string"
+      }
+    ],
+    "additional_iam_policy": [
+      {
+        "description": "Optional custom IAM policy to assign to connector ECS task role",
+        "type": "string",
+        "default": "{}"
       }
     ]
   }
