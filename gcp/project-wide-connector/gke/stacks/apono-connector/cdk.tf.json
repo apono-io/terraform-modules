@@ -3,7 +3,7 @@
     "metadata": {
       "backend": "local",
       "stackName": "apono-connector",
-      "version": "0.20.10"
+      "version": "0.20.11"
     },
     "outputs": {
     }
@@ -113,7 +113,7 @@
           },
           {
             "name": "image.tag",
-            "value": "v1.6.9"
+            "value": "v1.7.0"
           },
           {
             "name": "serviceAccount.manageClusterRoles",
