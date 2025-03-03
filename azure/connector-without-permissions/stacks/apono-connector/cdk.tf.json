@@ -105,7 +105,8 @@
         "name": "apono-${var.connectorId}-${random_id.stackId.hex}",
         "os_type": "Linux",
         "resource_group_name": "${var.resourceGroup}",
-        "subnet_ids": "${var.subnetIds}"
+        "subnet_ids": "${var.subnetIds}",
+        "tags": "${var.tags}"
       }
     },
     "azurerm_log_analytics_workspace": {
@@ -120,7 +121,8 @@
         "name": "apono-${var.connectorId}-${random_id.stackId.hex}",
         "resource_group_name": "${var.resourceGroup}",
         "retention_in_days": 30,
-        "sku": "PerGB2018"
+        "sku": "PerGB2018",
+        "tags": "${var.tags}"
       }
     },
     "random_id": {
@@ -192,6 +194,14 @@
         "default": [
         ],
         "type": "list"
+      }
+    ],
+    "tags": [
+      {
+        "default": {
+        },
+        "description": "Map of tags for the created resources",
+        "type": "map(string)"
       }
     ]
   }
