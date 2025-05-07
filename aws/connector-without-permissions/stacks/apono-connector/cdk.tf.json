@@ -3,7 +3,7 @@
     "metadata": {
       "backend": "local",
       "stackName": "apono-connector",
-      "version": "0.20.11"
+      "version": "0.20.12"
     },
     "outputs": {
       "apono-connector": {
@@ -130,35 +130,79 @@
           }
         },
         "assume_role_policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"1\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"ecs-tasks.amazonaws.com\"},\"Action\":[\"sts:AssumeRole\"]}]}",
-        "inline_policy": [
-          {
-            "name": "remote-management",
-            "policy": "{\"Statement\":[{\"Action\":\"sts:AssumeRole\",\"Effect\":\"Allow\",\"Resource\":\"*\",\"Sid\":\"assume\"}],\"Version\":\"2012-10-17\"}"
-          },
-          {
-            "name": "apono-tagged-keys-access-policy",
-            "policy": "{\"Statement\":[{\"Action\":\"kms:Sign\",\"Condition\":{\"StringEquals\":{\"aws:ResourceTag/apono-connector-read\":\"true\"}},\"Effect\":\"Allow\",\"Resource\":\"*\"},{\"Action\":\"kms:Decrypt\",\"Condition\":{\"StringEquals\":{\"aws:ResourceTag/apono-connector-access\":\"true\"}},\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"2012-10-17\"}"
-          },
-          {
-            "name": "apono-tagged-secrets-access-policy",
-            "policy": "{\"Statement\":[{\"Action\":[\"secretsmanager:GetSecretValue\",\"secretsmanager:DescribeSecret\"],\"Condition\":{\"StringEquals\":{\"aws:ResourceTag/apono-connector-read\":\"true\"}},\"Effect\":\"Allow\",\"Resource\":\"arn:aws:secretsmanager:*:*:secret:*\"}],\"Version\":\"2012-10-17\"}"
-          },
-          {
-            "name": "apono-tagged-lambda-functions-access-policy",
-            "policy": "{\"Statement\":[{\"Action\":[\"lambda:InvokeFunction\",\"lambda:GetFunction\"],\"Condition\":{\"StringEquals\":{\"aws:ResourceTag/apono-connector-access\":\"true\"}},\"Effect\":\"Allow\",\"Resource\":\"arn:aws:lambda:*:*:function:*\"}],\"Version\":\"2012-10-17\"}"
-          },
-          {
-            "name": "apono-cloudtrail-logs-s3-access-policy",
-            "policy": "{\"Statement\":[{\"Action\":\"s3:GetObject\",\"Effect\":\"Allow\",\"Resource\":\"arn:aws:s3:::aws-cloudtrail-logs-apono-*/*\"}],\"Version\":\"2012-10-17\"}"
-          }
-        ],
-        "managed_policy_arns": [
-          "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-        ],
         "max_session_duration": 3600,
         "name": "apono-connector-role-${random_id.stackId.id}",
         "path": "/",
         "tags": "${var.tags}"
+      }
+    },
+    "aws_iam_role_policy": {
+      "IAMRolePolicy-apono-cloudtrail-logs-s3-access-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicy-apono-cloudtrail-logs-s3-access-policy",
+            "uniqueId": "IAMRolePolicy-apono-cloudtrail-logs-s3-access-policy"
+          }
+        },
+        "name": "apono-cloudtrail-logs-s3-access-policy",
+        "policy": "{\"Statement\":[{\"Action\":\"s3:GetObject\",\"Effect\":\"Allow\",\"Resource\":\"arn:aws:s3:::aws-cloudtrail-logs-apono-*/*\"}],\"Version\":\"2012-10-17\"}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "IAMRolePolicy-apono-tagged-keys-access-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicy-apono-tagged-keys-access-policy",
+            "uniqueId": "IAMRolePolicy-apono-tagged-keys-access-policy"
+          }
+        },
+        "name": "apono-tagged-keys-access-policy",
+        "policy": "{\"Statement\":[{\"Action\":\"kms:Sign\",\"Condition\":{\"StringEquals\":{\"aws:ResourceTag/apono-connector-read\":\"true\"}},\"Effect\":\"Allow\",\"Resource\":\"*\"},{\"Action\":\"kms:Decrypt\",\"Condition\":{\"StringEquals\":{\"aws:ResourceTag/apono-connector-access\":\"true\"}},\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"2012-10-17\"}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "IAMRolePolicy-apono-tagged-lambda-functions-access-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicy-apono-tagged-lambda-functions-access-policy",
+            "uniqueId": "IAMRolePolicy-apono-tagged-lambda-functions-access-policy"
+          }
+        },
+        "name": "apono-tagged-lambda-functions-access-policy",
+        "policy": "{\"Statement\":[{\"Action\":[\"lambda:InvokeFunction\",\"lambda:GetFunction\"],\"Condition\":{\"StringEquals\":{\"aws:ResourceTag/apono-connector-access\":\"true\"}},\"Effect\":\"Allow\",\"Resource\":\"arn:aws:lambda:*:*:function:*\"}],\"Version\":\"2012-10-17\"}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "IAMRolePolicy-apono-tagged-secrets-access-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicy-apono-tagged-secrets-access-policy",
+            "uniqueId": "IAMRolePolicy-apono-tagged-secrets-access-policy"
+          }
+        },
+        "name": "apono-tagged-secrets-access-policy",
+        "policy": "{\"Statement\":[{\"Action\":[\"secretsmanager:GetSecretValue\",\"secretsmanager:DescribeSecret\"],\"Condition\":{\"StringEquals\":{\"aws:ResourceTag/apono-connector-read\":\"true\"}},\"Effect\":\"Allow\",\"Resource\":\"arn:aws:secretsmanager:*:*:secret:*\"}],\"Version\":\"2012-10-17\"}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "IAMRolePolicy-remote-management": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicy-remote-management",
+            "uniqueId": "IAMRolePolicy-remote-management"
+          }
+        },
+        "name": "remote-management",
+        "policy": "{\"Statement\":[{\"Action\":\"sts:AssumeRole\",\"Effect\":\"Allow\",\"Resource\":\"*\",\"Sid\":\"assume\"}],\"Version\":\"2012-10-17\"}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      }
+    },
+    "aws_iam_role_policy_attachment": {
+      "IAMRolePolicyAttachment-arnawsiamawspolicy--service-role--AmazonECSTaskExecutionRolePolicy": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicyAttachment-arn:aws:iam::aws:policy--service-role--AmazonECSTaskExecutionRolePolicy",
+            "uniqueId": "IAMRolePolicyAttachment-arnawsiamawspolicy--service-role--AmazonECSTaskExecutionRolePolicy"
+          }
+        },
+        "policy_arn": "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
+        "role": "${aws_iam_role.IAMRole.id}"
       }
     },
     "aws_secretsmanager_secret": {

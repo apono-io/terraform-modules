@@ -3,7 +3,7 @@
     "metadata": {
       "backend": "local",
       "stackName": "apono-connector",
-      "version": "0.20.11"
+      "version": "0.20.12"
     },
     "outputs": {
       "apono-connector": {
