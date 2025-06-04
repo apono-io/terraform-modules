@@ -89,6 +89,9 @@
             "workspace_key": "${azurerm_log_analytics_workspace.logAnalyticsWorkspace.primary_shared_key}"
           }
         },
+        "dns_config": {
+          "nameservers": "${var.dnsNameservers}"
+        },
         "identity": {
           "identity_ids": "${var.identityIds}",
           "type": "${var.identityType}"
@@ -163,6 +166,13 @@
       {
         "default": "apono-connector",
         "type": "string"
+      }
+    ],
+    "dnsNameservers": [
+      {
+        "default": [
+        ],
+        "type": "list"
       }
     ],
     "identityIds": [
