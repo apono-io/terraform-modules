@@ -9,7 +9,7 @@
     }
   },
   "resource": {
-    "google_project_iam_binding": {
+    "google_project_iam_member": {
       "service-account-project-iam-binding-browser": {
         "//": {
           "metadata": {
@@ -17,9 +17,7 @@
             "uniqueId": "service-account-project-iam-binding-browser"
           }
         },
-        "members": [
-          "serviceAccount:${var.serviceAccountName}@${var.projectId}.iam.gserviceaccount.com"
-        ],
+        "member": "serviceAccount:${var.serviceAccountName}@${var.projectId}.iam.gserviceaccount.com",
         "project": "${var.projectId}",
         "role": "roles/browser"
       },
@@ -30,9 +28,7 @@
             "uniqueId": "service-account-project-iam-binding-iamsecurityAdmin"
           }
         },
-        "members": [
-          "serviceAccount:${var.serviceAccountName}@${var.projectId}.iam.gserviceaccount.com"
-        ],
+        "member": "serviceAccount:${var.serviceAccountName}@${var.projectId}.iam.gserviceaccount.com",
         "project": "${var.projectId}",
         "role": "roles/iam.securityAdmin"
       },
@@ -43,9 +39,7 @@
             "uniqueId": "service-account-project-iam-binding-resourcemanagertagViewer"
           }
         },
-        "members": [
-          "serviceAccount:${var.serviceAccountName}@${var.projectId}.iam.gserviceaccount.com"
-        ],
+        "member": "serviceAccount:${var.serviceAccountName}@${var.projectId}.iam.gserviceaccount.com",
         "project": "${var.projectId}",
         "role": "roles/resourcemanager.tagViewer"
       }
