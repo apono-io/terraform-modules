@@ -109,7 +109,8 @@
         "os_type": "Linux",
         "resource_group_name": "${var.resourceGroup}",
         "subnet_ids": "${var.subnetIds}",
-        "tags": "${var.tags}"
+        "tags": "${var.tags}",
+        "zones": "${var.zones}"
       }
     },
     "azurerm_log_analytics_workspace": {
@@ -212,6 +213,13 @@
         },
         "description": "Map of tags for the created resources",
         "type": "map(string)"
+      }
+    ],
+    "zones": [
+      {
+        "default": [
+        ],
+        "type": "list"
       }
     ]
   }
