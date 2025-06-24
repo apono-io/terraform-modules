@@ -59,7 +59,7 @@
               "APONO_CONNECTOR_ID": "${var.connectorId}",
               "APONO_TOKEN": "${var.aponoToken}",
               "APONO_URL": "api.apono.io",
-              "CONNECTOR_METADATA": "{\"cloud_provider\":\"AZURE\",\"subscription_id\":\"${data.azurerm_subscription.azureSubscription.subscription_id}\",\"resource_group\":\"${var.resourceGroup}\",\"region\":\"${data.azurerm_resource_group.azureResourceGroup.location}\",\"is_azure_admin\":false}"
+              "CONNECTOR_METADATA": "{\"cloud_provider\":\"AZURE\",\"subscription_id\":\"${data.azurerm_subscription.azureSubscription.subscription_id}\",\"resource_group\":\"${var.resourceGroup}\",\"region\":\"${coalesce(var.location, data.azurerm_resource_group.azureResourceGroup.location)}\",\"is_azure_admin\":false}"
             },
             "image": "registry.apono.io/apono-connector:v1.7.2",
             "liveness_probe": {
@@ -104,7 +104,7 @@
           }
         ],
         "ip_address_type": "${var.ipAddressType}",
-        "location": "${data.azurerm_resource_group.azureResourceGroup.location}",
+        "location": "${coalesce(var.location, data.azurerm_resource_group.azureResourceGroup.location)}",
         "name": "apono-${var.connectorId}-${random_id.stackId.hex}",
         "os_type": "Linux",
         "resource_group_name": "${var.resourceGroup}",
@@ -121,7 +121,7 @@
             "uniqueId": "logAnalyticsWorkspace"
           }
         },
-        "location": "${data.azurerm_resource_group.azureResourceGroup.location}",
+        "location": "${coalesce(var.location, data.azurerm_resource_group.azureResourceGroup.location)}",
         "name": "apono-${var.connectorId}-${random_id.stackId.hex}",
         "resource_group_name": "${var.resourceGroup}",
         "retention_in_days": 30,
@@ -192,6 +192,13 @@
     "ipAddressType": [
       {
         "default": "None",
+        "type": "string"
+      }
+    ],
+    "location": [
+      {
+        "default": null,
+        "description": "the location for the resources. if not set it will use the location of the resource group",
         "type": "string"
       }
     ],
