@@ -74,7 +74,7 @@
               "initial_delay_seconds": 30,
               "period_seconds": 30
             },
-            "memory": 1.5,
+            "memory": 2,
             "name": "apono-connector",
             "ports": [
               {
