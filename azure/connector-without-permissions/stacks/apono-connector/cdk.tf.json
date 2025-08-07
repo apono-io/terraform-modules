@@ -2,8 +2,13 @@
   "//": {
     "metadata": {
       "backend": "local",
+      "overrides": {
+        "azurerm_log_analytics_workspace": [
+          "local_authentication_enabled"
+        ]
+      },
       "stackName": "apono-connector",
-      "version": "0.20.12"
+      "version": "0.21.0"
     },
     "outputs": {
       "apono-connector": {
@@ -121,6 +126,7 @@
             "uniqueId": "logAnalyticsWorkspace"
           }
         },
+        "local_authentication_enabled": true,
         "location": "${coalesce(var.location, data.azurerm_resource_group.azureResourceGroup.location)}",
         "name": "apono-${var.connectorId}-${random_id.stackId.hex}",
         "resource_group_name": "${var.resourceGroup}",
