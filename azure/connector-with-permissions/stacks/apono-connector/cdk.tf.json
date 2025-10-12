@@ -3,6 +3,9 @@
     "metadata": {
       "backend": "local",
       "overrides": {
+        "azurerm_container_group": [
+          "dynamic"
+        ],
         "azurerm_log_analytics_workspace": [
           "local_authentication_enabled"
         ]
@@ -117,8 +120,13 @@
             "workspace_key": "${azurerm_log_analytics_workspace.logAnalyticsWorkspace.primary_shared_key}"
           }
         },
-        "dns_config": {
-          "nameservers": "${var.dnsNameservers}"
+        "dynamic": {
+          "dns_config": {
+            "content": {
+              "nameservers": "${var.dnsNameservers}"
+            },
+            "for_each": "${(length(var.dnsNameservers) >= 1) ? [1] : []}"
+          }
         },
         "identity": {
           "identity_ids": [
