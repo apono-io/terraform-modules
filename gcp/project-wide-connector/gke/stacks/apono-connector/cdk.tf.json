@@ -107,11 +107,19 @@
           },
           {
             "name": "image.tag",
-            "value": "v1.7.3"
+            "value": "v1.7.4"
           },
           {
             "name": "serviceAccount.manageClusterRoles",
             "value": "true"
+          },
+          {
+            "name": "resources.limits.cpu",
+            "value": "${var.cpu}"
+          },
+          {
+            "name": "resources.requests.cpu",
+            "value": "${var.cpuRequests}"
           },
           {
             "name": "serviceAccount.gcpServiceAccountEmail",
@@ -142,6 +150,18 @@
     "connectorId": [
       {
         "default": "apono-connector",
+        "type": "string"
+      }
+    ],
+    "cpu": [
+      {
+        "default": "1000m",
+        "type": "string"
+      }
+    ],
+    "cpuRequests": [
+      {
+        "default": "500m",
         "type": "string"
       }
     ],

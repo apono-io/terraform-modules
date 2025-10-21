@@ -92,7 +92,7 @@
               "APONO_URL": "api.apono.io",
               "CONNECTOR_METADATA": "{\"cloud_provider\":\"AZURE\",\"subscription_id\":\"${data.azurerm_subscription.azureSubscription.subscription_id}\",\"resource_group\":\"${var.resourceGroup}\",\"region\":\"${coalesce(var.location, data.azurerm_resource_group.azureResourceGroup.location)}\",\"is_azure_admin\":true}"
             },
-            "image": "registry.apono.io/apono-connector:v1.7.3",
+            "image": "registry.apono.io/apono-connector:v1.7.4",
             "liveness_probe": {
               "failure_threshold": 3,
               "http_get": [
