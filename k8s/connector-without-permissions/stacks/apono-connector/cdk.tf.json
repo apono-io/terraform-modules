@@ -58,6 +58,14 @@
           {
             "name": "resources.requests.cpu",
             "value": "${var.cpuRequests}"
+          },
+          {
+            "name": "resources.limits.memory",
+            "value": "${var.memory}"
+          },
+          {
+            "name": "resources.requests.memory",
+            "value": "${var.memoryRequests}"
           }
         ]
       }
@@ -92,6 +100,18 @@
     "cpuRequests": [
       {
         "default": "500m",
+        "type": "string"
+      }
+    ],
+    "memory": [
+      {
+        "default": "2G",
+        "type": "string"
+      }
+    ],
+    "memoryRequests": [
+      {
+        "default": "1G",
         "type": "string"
       }
     ],
