@@ -7,7 +7,8 @@
     },
     "outputs": {
       "apono-connector": {
-        "connector_role_arn": "connector_role_arn"
+        "connector_role_arn": "connector_role_arn",
+        "log_group_arn": "log_group_arn"
       }
     }
   },
@@ -26,6 +27,9 @@
   "output": {
     "connector_role_arn": {
       "value": "${aws_iam_role.IAMRole.arn}"
+    },
+    "log_group_arn": {
+      "value": "${aws_cloudwatch_log_group.LogsLogGroup.arn}"
     }
   },
   "resource": {
@@ -84,7 +88,7 @@
         },
         "deployment_maximum_percent": 100,
         "deployment_minimum_healthy_percent": 0,
-        "desired_count": 1,
+        "desired_count": "${var.numberOfInstances}",
         "launch_type": "FARGATE",
         "name": "apono-connector-ecsservice-${random_id.stackId.id}",
         "network_configuration": {
@@ -439,6 +443,13 @@
       {
         "default": "apono-connector",
         "type": "string"
+      }
+    ],
+    "numberOfInstances": [
+      {
+        "default": 1,
+        "description": "Number of connector instances",
+        "type": "number"
       }
     ],
     "subnetIds": [
