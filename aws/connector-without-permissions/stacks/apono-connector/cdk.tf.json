@@ -42,7 +42,7 @@
           }
         },
         "name": "/ecs/apono-connector-logs-${random_id.stackId.id}",
-        "retention_in_days": 30,
+        "retention_in_days": "${var.logGroupRetentionInDays}",
         "tags": "${var.tags}"
       }
     },
@@ -303,6 +303,13 @@
       {
         "default": "apono-connector",
         "type": "string"
+      }
+    ],
+    "logGroupRetentionInDays": [
+      {
+        "default": 30,
+        "description": "Number of days to retain log group logs",
+        "type": "number"
       }
     ],
     "numberOfInstances": [
