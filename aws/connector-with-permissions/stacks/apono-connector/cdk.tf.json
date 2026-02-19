@@ -135,7 +135,7 @@
         },
         "assume_role_policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"1\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"ecs-tasks.amazonaws.com\"},\"Action\":[\"sts:AssumeRole\"]}]}",
         "max_session_duration": 3600,
-        "name": "apono-connector-role-${random_id.stackId.id}",
+        "name": "${coalesce(var.roleName, \"apono-connector-role-${random_id.stackId.id}\")}",
         "path": "/",
         "tags": "${var.tags}"
       }
@@ -479,6 +479,13 @@
         "default": 1,
         "description": "Number of connector instances",
         "type": "number"
+      }
+    ],
+    "roleName": [
+      {
+        "default": null,
+        "description": "Optional name for the connector IAM role. Defaults to apono-connector-role-<stack-id>",
+        "type": "string"
       }
     ],
     "subnetIds": [
