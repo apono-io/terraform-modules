@@ -112,9 +112,9 @@
             "uniqueId": "ECSTaskDefinition"
           }
         },
-        "container_definitions": "[{\"name\":\"apono-connector\",\"image\":\"registry.apono.io/apono-connector:v1.7.8\",\"repositoryCredentials\":{\"credentialsParameter\":\"${aws_secretsmanager_secret.ECSImageCredentials.arn}\"},\"cpu\":null,\"memory\":null,\"memoryReservation\":null,\"links\":[],\"portMappings\":[],\"essential\":true,\"entryPoint\":[],\"command\":[],\"environment\":[{\"name\":\"APONO_CONNECTOR_ID\",\"value\":\"${var.connectorId}\"},{\"name\":\"APONO_URL\",\"value\":\"api.apono.io\"},{\"name\":\"TEMPLATES_PATH\",\"value\":\"/app/apono-agent-templates\"},{\"name\":\"APONO_TOKEN\",\"value\":\"${var.aponoToken}\"}],\"environmentFiles\":[],\"mountPoints\":[],\"volumesFrom\":[],\"linuxParameters\":null,\"secrets\":[],\"dependsOn\":[],\"startTimeout\":null,\"stopTimeout\":null,\"hostname\":null,\"user\":null,\"workingDirectory\":null,\"disableNetworking\":null,\"privileged\":null,\"readonlyRootFilesystem\":null,\"dnsServers\":[],\"dnsSearchDomains\":[],\"extraHosts\":[],\"dockerSecurityOptions\":[],\"interactive\":null,\"pseudoTerminal\":null,\"dockerLabels\":null,\"ulimits\":[],\"logConfiguration\":{\"logDriver\":\"awslogs\",\"options\":{\"awslogs-group\":\"${aws_cloudwatch_log_group.LogsLogGroup.name}\",\"awslogs-region\":\"${data.aws_region.region.name}\",\"awslogs-stream-prefix\":\"ecs\"},\"secretOptions\":[]},\"healthCheck\":{\"command\":[\"CMD-SHELL\",\"command -v curl &> /dev/null || apk add -q curl && curl -s -f http://localhost:8080/healthz || exit 1\"],\"interval\":30,\"timeout\":5,\"retries\":3,\"startPeriod\":30},\"systemControls\":[],\"resourceRequirements\":[],\"firelensConfiguration\":null}]",
+        "container_definitions": "[{\"name\":\"apono-connector\",\"image\":\"registry.apono.io/apono-connector:v1.7.8\",\"repositoryCredentials\":{\"credentialsParameter\":\"${aws_secretsmanager_secret.ECSImageCredentials.arn}\"},\"cpu\":null,\"memory\":null,\"memoryReservation\":null,\"links\":[],\"portMappings\":[],\"essential\":true,\"entryPoint\":[],\"command\":[],\"environment\":[{\"name\":\"APONO_CONNECTOR_ID\",\"value\":\"${var.connectorId}\"},{\"name\":\"APONO_URL\",\"value\":\"api.apono.io\"},{\"name\":\"TEMPLATES_PATH\",\"value\":\"/app/apono-agent-templates\"}],\"environmentFiles\":[],\"mountPoints\":[],\"volumesFrom\":[],\"linuxParameters\":null,\"secrets\":[{\"name\":\"APONO_TOKEN\",\"valueFrom\":\"${aws_secretsmanager_secret.AponoTokenSecret.arn}\"}],\"dependsOn\":[],\"startTimeout\":null,\"stopTimeout\":null,\"hostname\":null,\"user\":null,\"workingDirectory\":null,\"disableNetworking\":null,\"privileged\":null,\"readonlyRootFilesystem\":null,\"dnsServers\":[],\"dnsSearchDomains\":[],\"extraHosts\":[],\"dockerSecurityOptions\":[],\"interactive\":null,\"pseudoTerminal\":null,\"dockerLabels\":null,\"ulimits\":[],\"logConfiguration\":{\"logDriver\":\"awslogs\",\"options\":{\"awslogs-group\":\"${aws_cloudwatch_log_group.LogsLogGroup.name}\",\"awslogs-region\":\"${data.aws_region.region.name}\",\"awslogs-stream-prefix\":\"ecs\"},\"secretOptions\":[]},\"healthCheck\":{\"command\":[\"CMD-SHELL\",\"command -v curl &> /dev/null || apk add -q curl && curl -s -f http://localhost:8080/healthz || exit 1\"],\"interval\":30,\"timeout\":5,\"retries\":3,\"startPeriod\":30},\"systemControls\":[],\"resourceRequirements\":[],\"firelensConfiguration\":null}]",
         "cpu": "1024",
-        "execution_role_arn": "${aws_iam_role.IAMRole.arn}",
+        "execution_role_arn": "${aws_iam_role.EcsTaskExecutionIAMRole.arn}",
         "family": "connector-task-definition-${random_id.stackId.id}",
         "memory": "2048",
         "network_mode": "awsvpc",
@@ -126,6 +126,19 @@
       }
     },
     "aws_iam_role": {
+      "EcsTaskExecutionIAMRole": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/EcsTaskExecutionIAMRole",
+            "uniqueId": "EcsTaskExecutionIAMRole"
+          }
+        },
+        "assume_role_policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"1\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"ecs-tasks.amazonaws.com\"},\"Action\":[\"sts:AssumeRole\"]}]}",
+        "max_session_duration": 3600,
+        "name": "apono-connector-ecs-task-execution-role-${random_id.stackId.id}",
+        "path": "/",
+        "tags": "${var.tags}"
+      },
       "IAMRole": {
         "//": {
           "metadata": {
@@ -141,6 +154,17 @@
       }
     },
     "aws_iam_role_policy": {
+      "EcsTaskExecutionIAMRolePolicy": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/EcsTaskExecutionIAMRolePolicy",
+            "uniqueId": "EcsTaskExecutionIAMRolePolicy"
+          }
+        },
+        "name": "read-secrets-policy",
+        "policy": "{\"Statement\":[{\"Action\":[\"secretsmanager:GetSecretValue\",\"secretsmanager:DescribeSecret\"],\"Effect\":\"Allow\",\"Resource\":[\"${aws_secretsmanager_secret.ECSImageCredentials.arn}\",\"${aws_secretsmanager_secret.AponoTokenSecret.arn}\"]}],\"Version\":\"2012-10-17\"}",
+        "role": "${aws_iam_role.EcsTaskExecutionIAMRole.id}"
+      },
       "IAMRolePolicy-AponoConnectorLogsRead": {
         "//": {
           "metadata": {
@@ -330,6 +354,16 @@
       }
     },
     "aws_iam_role_policy_attachment": {
+      "EcsTaskExecutionIAMRolePolicyAttachment": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/EcsTaskExecutionIAMRolePolicyAttachment",
+            "uniqueId": "EcsTaskExecutionIAMRolePolicyAttachment"
+          }
+        },
+        "policy_arn": "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
+        "role": "${aws_iam_role.EcsTaskExecutionIAMRole.id}"
+      },
       "IAMRolePolicyAttachment-arnawsiamawspolicy--AWSCloudFormationReadOnlyAccess": {
         "//": {
           "metadata": {
@@ -359,19 +393,20 @@
         },
         "policy_arn": "arn:aws:iam::aws:policy/SecurityAudit",
         "role": "${aws_iam_role.IAMRole.id}"
-      },
-      "IAMRolePolicyAttachment-arnawsiamawspolicy--service-role--AmazonECSTaskExecutionRolePolicy": {
-        "//": {
-          "metadata": {
-            "path": "apono-connector/IAMRolePolicyAttachment-arn:aws:iam::aws:policy--service-role--AmazonECSTaskExecutionRolePolicy",
-            "uniqueId": "IAMRolePolicyAttachment-arnawsiamawspolicy--service-role--AmazonECSTaskExecutionRolePolicy"
-          }
-        },
-        "policy_arn": "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
-        "role": "${aws_iam_role.IAMRole.id}"
       }
     },
     "aws_secretsmanager_secret": {
+      "AponoTokenSecret": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/AponoTokenSecret",
+            "uniqueId": "AponoTokenSecret"
+          }
+        },
+        "description": "Apono Connector token",
+        "name": "apono-connector-token-${random_id.stackId.id}",
+        "tags": "${var.tags}"
+      },
       "ECSImageCredentials": {
         "//": {
           "metadata": {
@@ -381,10 +416,20 @@
         },
         "description": "Apono Connector docker registry credentials",
         "name": "apono-connector-registry-credentials-${random_id.stackId.id}",
-        "tags": "${merge(var.tags, {\"apono-connector-read\" = \"true\"})}"
+        "tags": "${var.tags}"
       }
     },
     "aws_secretsmanager_secret_version": {
+      "AponoTokenSecretVersion": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/AponoTokenSecretVersion",
+            "uniqueId": "AponoTokenSecretVersion"
+          }
+        },
+        "secret_id": "${aws_secretsmanager_secret.AponoTokenSecret.id}",
+        "secret_string": "${var.aponoToken}"
+      },
       "ECSImageCredentialsVersion": {
         "//": {
           "metadata": {
