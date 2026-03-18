@@ -101,7 +101,8 @@
         "platform_version": "LATEST",
         "scheduling_strategy": "REPLICA",
         "tags": "${var.tags}",
-        "task_definition": "${aws_ecs_task_definition.ECSTaskDefinition.arn}"
+        "task_definition": "${aws_ecs_task_definition.ECSTaskDefinition.arn}",
+        "wait_for_steady_state": true
       }
     },
     "aws_ecs_task_definition": {
@@ -323,7 +324,7 @@
     "required_providers": {
       "aws": {
         "source": "aws",
-        "version": "~> 5.0"
+        "version": "~> 6.0"
       },
       "random": {
         "source": "hashicorp/random",
