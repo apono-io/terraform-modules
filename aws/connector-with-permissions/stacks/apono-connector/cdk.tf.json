@@ -262,7 +262,7 @@
           }
         },
         "name": "eks-write-policy",
-        "policy": "{\"Statement\":[{\"Action\":[\"eks:DeleteAccessEntry\",\"eks:UntagResource\",\"eks:AssociateAccessPolicy\",\"eks:DisassociateAccessPolicy\",\"eks:TagResource\",\"eks:CreateAccessEntry\"],\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "{\"Statement\":[{\"Action\":[\"eks:DeleteAccessEntry\",\"eks:UntagResource\",\"eks:AssociateAccessPolicy\",\"eks:DisassociateAccessPolicy\",\"eks:TagResource\",\"eks:CreateAccessEntry\",\"eks:UpdateAccessEntry\"],\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"2012-10-17\"}",
         "role": "${aws_iam_role.IAMRole.id}"
       },
       "IAMRolePolicy-iam-access-policy": {
