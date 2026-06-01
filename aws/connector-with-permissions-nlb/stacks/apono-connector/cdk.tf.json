@@ -1,0 +1,858 @@
+{
+  "//": {
+    "metadata": {
+      "backend": "local",
+      "stackName": "apono-connector",
+      "version": "0.21.0"
+    },
+    "outputs": {
+      "apono-connector": {
+        "connector_role_arn": "connector_role_arn",
+        "log_group_arn": "log_group_arn",
+        "nlb_dns_name": "nlb_dns_name"
+      }
+    }
+  },
+  "data": {
+    "aws_region": {
+      "region": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/region",
+            "uniqueId": "region"
+          }
+        }
+      }
+    }
+  },
+  "output": {
+    "connector_role_arn": {
+      "value": "${aws_iam_role.IAMRole.arn}"
+    },
+    "log_group_arn": {
+      "value": "${aws_cloudwatch_log_group.LogsLogGroup.arn}"
+    },
+    "nlb_dns_name": {
+      "value": "${aws_lb.NLB.dns_name}"
+    }
+  },
+  "resource": {
+    "aws_cloudwatch_log_group": {
+      "LogsLogGroup": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/LogsLogGroup",
+            "uniqueId": "LogsLogGroup"
+          }
+        },
+        "name": "/ecs/apono-connector-logs-${random_id.stackId.id}",
+        "retention_in_days": "${var.logGroupRetentionInDays}",
+        "tags": "${var.tags}"
+      }
+    },
+    "aws_ecs_cluster": {
+      "ECSCluster": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/ECSCluster",
+            "uniqueId": "ECSCluster"
+          }
+        },
+        "name": "apono-connector-ecscluster-${random_id.stackId.id}",
+        "tags": "${var.tags}"
+      }
+    },
+    "aws_ecs_cluster_capacity_providers": {
+      "EcsClusterCapacityProvider": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/EcsClusterCapacityProvider",
+            "uniqueId": "EcsClusterCapacityProvider"
+          }
+        },
+        "capacity_providers": [
+          "FARGATE",
+          "FARGATE_SPOT"
+        ],
+        "cluster_name": "${aws_ecs_cluster.ECSCluster.name}"
+      }
+    },
+    "aws_ecs_service": {
+      "ECSService": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/ECSService",
+            "uniqueId": "ECSService"
+          }
+        },
+        "cluster": "${aws_ecs_cluster.ECSCluster.arn}",
+        "depends_on": [
+          "aws_lb_listener.NLBListener10020",
+          "aws_lb_listener.NLBListener10021",
+          "aws_lb_listener.NLBListener10022",
+          "aws_lb_listener.NLBListener10023",
+          "aws_lb_listener.NLBListener10024"
+        ],
+        "deployment_circuit_breaker": {
+          "enable": false,
+          "rollback": false
+        },
+        "deployment_maximum_percent": 100,
+        "deployment_minimum_healthy_percent": 0,
+        "desired_count": "${var.numberOfInstances}",
+        "launch_type": "FARGATE",
+        "load_balancer": [
+          {
+            "container_name": "apono-connector",
+            "container_port": 10020,
+            "target_group_arn": "${aws_lb_target_group.NLBTargetGroup10020.arn}"
+          },
+          {
+            "container_name": "apono-connector",
+            "container_port": 10021,
+            "target_group_arn": "${aws_lb_target_group.NLBTargetGroup10021.arn}"
+          },
+          {
+            "container_name": "apono-connector",
+            "container_port": 10022,
+            "target_group_arn": "${aws_lb_target_group.NLBTargetGroup10022.arn}"
+          },
+          {
+            "container_name": "apono-connector",
+            "container_port": 10023,
+            "target_group_arn": "${aws_lb_target_group.NLBTargetGroup10023.arn}"
+          },
+          {
+            "container_name": "apono-connector",
+            "container_port": 10024,
+            "target_group_arn": "${aws_lb_target_group.NLBTargetGroup10024.arn}"
+          }
+        ],
+        "name": "apono-connector-ecsservice-${random_id.stackId.id}",
+        "network_configuration": {
+          "assign_public_ip": "${var.assignPublicIp}",
+          "security_groups": [
+            "${aws_security_group.SecurityGroup.id}"
+          ],
+          "subnets": "${var.subnetIds}"
+        },
+        "platform_version": "LATEST",
+        "scheduling_strategy": "REPLICA",
+        "tags": "${var.tags}",
+        "task_definition": "${aws_ecs_task_definition.ECSTaskDefinition.arn}",
+        "wait_for_steady_state": true
+      }
+    },
+    "aws_ecs_task_definition": {
+      "ECSTaskDefinition": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/ECSTaskDefinition",
+            "uniqueId": "ECSTaskDefinition"
+          }
+        },
+        "container_definitions": "[{\"name\":\"apono-connector\",\"image\":\"registry.apono.io/apono-connector:v1.8.3\",\"repositoryCredentials\":{\"credentialsParameter\":\"${aws_secretsmanager_secret.ECSImageCredentials.arn}\"},\"cpu\":null,\"memory\":null,\"memoryReservation\":null,\"links\":[],\"portMappings\":[{\"containerPort\":10020,\"hostPort\":null,\"protocol\":\"tcp\"},{\"containerPort\":10021,\"hostPort\":null,\"protocol\":\"tcp\"},{\"containerPort\":10022,\"hostPort\":null,\"protocol\":\"tcp\"},{\"containerPort\":10023,\"hostPort\":null,\"protocol\":\"tcp\"},{\"containerPort\":10024,\"hostPort\":null,\"protocol\":\"tcp\"}],\"essential\":true,\"entryPoint\":[],\"command\":[],\"environment\":[{\"name\":\"APONO_CONNECTOR_ID\",\"value\":\"${var.connectorId}\"},{\"name\":\"APONO_URL\",\"value\":\"api.apono.io\"},{\"name\":\"TEMPLATES_PATH\",\"value\":\"/app/apono-agent-templates\"}],\"environmentFiles\":[],\"mountPoints\":[],\"volumesFrom\":[],\"linuxParameters\":null,\"secrets\":[{\"name\":\"APONO_TOKEN\",\"valueFrom\":\"${aws_secretsmanager_secret.AponoTokenSecret.arn}\"}],\"dependsOn\":[],\"startTimeout\":null,\"stopTimeout\":null,\"hostname\":null,\"user\":null,\"workingDirectory\":null,\"disableNetworking\":null,\"privileged\":null,\"readonlyRootFilesystem\":null,\"dnsServers\":[],\"dnsSearchDomains\":[],\"extraHosts\":[],\"dockerSecurityOptions\":[],\"interactive\":null,\"pseudoTerminal\":null,\"dockerLabels\":null,\"ulimits\":[],\"logConfiguration\":{\"logDriver\":\"awslogs\",\"options\":{\"awslogs-group\":\"${aws_cloudwatch_log_group.LogsLogGroup.name}\",\"awslogs-region\":\"${data.aws_region.region.name}\",\"awslogs-stream-prefix\":\"ecs\"},\"secretOptions\":[]},\"healthCheck\":{\"command\":[\"CMD-SHELL\",\"command -v curl &> /dev/null || apk add -q curl && curl -s -f http://localhost:8080/healthz || exit 1\"],\"interval\":30,\"timeout\":5,\"retries\":3,\"startPeriod\":30},\"systemControls\":[],\"resourceRequirements\":[],\"firelensConfiguration\":null}]",
+        "cpu": "1024",
+        "execution_role_arn": "${aws_iam_role.EcsTaskExecutionIAMRole.arn}",
+        "family": "connector-task-definition-${random_id.stackId.id}",
+        "memory": "2048",
+        "network_mode": "awsvpc",
+        "requires_compatibilities": [
+          "FARGATE"
+        ],
+        "tags": "${var.tags}",
+        "task_role_arn": "${aws_iam_role.IAMRole.arn}"
+      }
+    },
+    "aws_iam_role": {
+      "EcsTaskExecutionIAMRole": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/EcsTaskExecutionIAMRole",
+            "uniqueId": "EcsTaskExecutionIAMRole"
+          }
+        },
+        "assume_role_policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"1\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"ecs-tasks.amazonaws.com\"},\"Action\":[\"sts:AssumeRole\"]}]}",
+        "max_session_duration": 3600,
+        "name": "apono-connector-ecs-task-execution-role-${random_id.stackId.id}",
+        "path": "/",
+        "tags": "${var.tags}"
+      },
+      "IAMRole": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRole",
+            "uniqueId": "IAMRole"
+          }
+        },
+        "assume_role_policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"1\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"ecs-tasks.amazonaws.com\"},\"Action\":[\"sts:AssumeRole\"]}]}",
+        "max_session_duration": 3600,
+        "name": "${coalesce(var.roleName, \"apono-connector-role-${random_id.stackId.id}\")}",
+        "path": "/",
+        "tags": "${var.tags}"
+      }
+    },
+    "aws_iam_role_policy": {
+      "EcsTaskExecutionIAMRolePolicy": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/EcsTaskExecutionIAMRolePolicy",
+            "uniqueId": "EcsTaskExecutionIAMRolePolicy"
+          }
+        },
+        "name": "read-secrets-policy",
+        "policy": "{\"Statement\":[{\"Action\":[\"secretsmanager:GetSecretValue\",\"secretsmanager:DescribeSecret\"],\"Effect\":\"Allow\",\"Resource\":[\"${aws_secretsmanager_secret.ECSImageCredentials.arn}\",\"${aws_secretsmanager_secret.AponoTokenSecret.arn}\"]}],\"Version\":\"2012-10-17\"}",
+        "role": "${aws_iam_role.EcsTaskExecutionIAMRole.id}"
+      },
+      "IAMRolePolicy-AponoConnectorLogsRead": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicy-AponoConnectorLogsRead",
+            "uniqueId": "IAMRolePolicy-AponoConnectorLogsRead"
+          }
+        },
+        "name": "AponoConnectorLogsRead",
+        "policy": "{\"Statement\":[{\"Action\":[\"logs:DescribeLogStreams\",\"logs:GetLogEvents\"],\"Effect\":\"Allow\",\"Resource\":\"arn:aws:logs:*:*:log-group:/ecs/apono-connector-logs-*:*\",\"Sid\":\"AllowReadingAponoConnectorLogs\"}],\"Version\":\"2012-10-17\"}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "IAMRolePolicy-apono-cloudtrail-logs-s3-access-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicy-apono-cloudtrail-logs-s3-access-policy",
+            "uniqueId": "IAMRolePolicy-apono-cloudtrail-logs-s3-access-policy"
+          }
+        },
+        "name": "apono-cloudtrail-logs-s3-access-policy",
+        "policy": "{\"Statement\":[{\"Action\":\"s3:GetObject\",\"Effect\":\"Allow\",\"Resource\":\"arn:aws:s3:::aws-cloudtrail-logs-apono-*/*\"}],\"Version\":\"2012-10-17\"}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "IAMRolePolicy-apono-tagged-keys-access-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicy-apono-tagged-keys-access-policy",
+            "uniqueId": "IAMRolePolicy-apono-tagged-keys-access-policy"
+          }
+        },
+        "name": "apono-tagged-keys-access-policy",
+        "policy": "{\"Statement\":[{\"Action\":\"kms:Sign\",\"Condition\":{\"StringEquals\":{\"aws:ResourceTag/apono-connector-read\":\"true\"}},\"Effect\":\"Allow\",\"Resource\":\"*\"},{\"Action\":\"kms:Decrypt\",\"Condition\":{\"StringEquals\":{\"aws:ResourceTag/apono-connector-access\":\"true\"}},\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"2012-10-17\"}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "IAMRolePolicy-apono-tagged-lambda-functions-access-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicy-apono-tagged-lambda-functions-access-policy",
+            "uniqueId": "IAMRolePolicy-apono-tagged-lambda-functions-access-policy"
+          }
+        },
+        "name": "apono-tagged-lambda-functions-access-policy",
+        "policy": "{\"Statement\":[{\"Action\":[\"lambda:InvokeFunction\",\"lambda:GetFunction\"],\"Condition\":{\"StringEquals\":{\"aws:ResourceTag/apono-connector-access\":\"true\"}},\"Effect\":\"Allow\",\"Resource\":\"arn:aws:lambda:*:*:function:*\"}],\"Version\":\"2012-10-17\"}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "IAMRolePolicy-apono-tagged-secrets-access-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicy-apono-tagged-secrets-access-policy",
+            "uniqueId": "IAMRolePolicy-apono-tagged-secrets-access-policy"
+          }
+        },
+        "name": "apono-tagged-secrets-access-policy",
+        "policy": "{\"Statement\":[{\"Action\":[\"secretsmanager:GetSecretValue\",\"secretsmanager:DescribeSecret\"],\"Condition\":{\"StringEquals\":{\"aws:ResourceTag/apono-connector-read\":\"true\"}},\"Effect\":\"Allow\",\"Resource\":\"arn:aws:secretsmanager:*:*:secret:*\"}],\"Version\":\"2012-10-17\"}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "IAMRolePolicy-ec2-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicy-ec2-policy",
+            "uniqueId": "IAMRolePolicy-ec2-policy"
+          }
+        },
+        "name": "ec2-policy",
+        "policy": "{\"Statement\":[{\"Action\":[\"ec2:DescribeInstances\",\"ec2:DescribeTags\"],\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"2012-10-17\"}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "IAMRolePolicy-ecr-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicy-ecr-policy",
+            "uniqueId": "IAMRolePolicy-ecr-policy"
+          }
+        },
+        "name": "ecr-policy",
+        "policy": "{\"Statement\":[{\"Action\":[\"ecr:DescribeImages\",\"ecr:DescribeRepositories\"],\"Effect\":\"Allow\",\"Resource\":\"*\",\"Sid\":\"assume\"}],\"Version\":\"2012-10-17\"}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "IAMRolePolicy-eks-read-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicy-eks-read-policy",
+            "uniqueId": "IAMRolePolicy-eks-read-policy"
+          }
+        },
+        "name": "eks-read-policy",
+        "policy": "{\"Statement\":[{\"Action\":[\"eks:AccessKubernetesApi\",\"eks:ListTagsForResource\",\"eks:ListAccessEntries\",\"eks:DescribeAccessEntry\",\"eks:ListAssociatedAccessPolicies\",\"eks:DescribeCluster\",\"eks:ListAccessPolicies\",\"eks:ListClusters\"],\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"2012-10-17\"}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "IAMRolePolicy-eks-write-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicy-eks-write-policy",
+            "uniqueId": "IAMRolePolicy-eks-write-policy"
+          }
+        },
+        "name": "eks-write-policy",
+        "policy": "{\"Statement\":[{\"Action\":[\"eks:DeleteAccessEntry\",\"eks:UntagResource\",\"eks:AssociateAccessPolicy\",\"eks:DisassociateAccessPolicy\",\"eks:TagResource\",\"eks:CreateAccessEntry\",\"eks:UpdateAccessEntry\"],\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"2012-10-17\"}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "IAMRolePolicy-iam-access-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicy-iam-access-policy",
+            "uniqueId": "IAMRolePolicy-iam-access-policy"
+          }
+        },
+        "name": "iam-access-policy",
+        "policy": "{\"Statement\":[{\"Action\":[\"iam:ListPolicies\",\"iam:CreateInstanceProfile\",\"iam:ListGroups\",\"iam:ListInstanceProfiles\",\"iam:ListRoles\"],\"Effect\":\"Allow\",\"Resource\":\"*\"},{\"Action\":[\"iam:CreateInstanceProfile\",\"iam:GetRole\",\"iam:UpdateAssumeRolePolicy\",\"iam:ListRoleTags\",\"iam:TagRole\",\"iam:UntagRole\",\"iam:CreateRole\",\"iam:DeleteRole\",\"iam:AttachRolePolicy\",\"iam:PutRolePolicy\",\"iam:AddRoleToInstanceProfile\",\"iam:ListInstanceProfilesForRole\",\"iam:DetachRolePolicy\",\"iam:ListAttachedRolePolicies\",\"iam:DeleteRolePolicy\",\"iam:ListAttachedGroupPolicies\",\"iam:ListRolePolicies\",\"iam:GetRolePolicy\",\"iam:PassRole\",\"iam:GetInstanceProfile\",\"iam:CreateUser\",\"iam:CreateAccessKey\",\"iam:DeleteAccessKey\",\"iam:PutUserPolicy\",\"iam:DeleteUserPolicy\",\"iam:GetUser\",\"iam:GetUserPolicy\",\"iam:DeleteUser\",\"iam:ListAttachedUserPolicies\",\"iam:ListUserPolicies\",\"iam:UpdateLoginProfile\",\"iam:ListAccessKeys\",\"iam:AttachUserPolicy\",\"iam:DetachUserPolicy\",\"iam:CreateLoginProfile\",\"iam:CreateServiceLinkedRole\",\"iam:GetPolicy\",\"iam:GetPolicyVersion\",\"iam:ListGroupPolicies\",\"iam:GetGroupPolicy\",\"iam:PutRolePermissionsBoundary\",\"iam:DeleteRolePermissionsBoundary\",\"iam:PutUserPermissionsBoundary\",\"iam:DeleteUserPermissionsBoundary\",\"iam:TagUser\",\"iam:ListUserTags\",\"iam:UpdateRole\"],\"Effect\":\"Allow\",\"Resource\":[\"arn:aws:iam::*:instance-profile/*\",\"arn:aws:iam::*:role/*\",\"arn:aws:iam::*:group/*\",\"arn:aws:iam::*:user/*\",\"arn:aws:iam::*:policy/*\"]}],\"Version\":\"2012-10-17\"}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "IAMRolePolicy-rds-connect": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicy-rds-connect",
+            "uniqueId": "IAMRolePolicy-rds-connect"
+          }
+        },
+        "name": "rds-connect",
+        "policy": "{\"Statement\":[{\"Action\":\"rds-db:connect\",\"Effect\":\"Allow\",\"Resource\":\"arn:aws:rds-db:*:*:dbuser:*/apono_connector\"}],\"Version\":\"2012-10-17\"}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "IAMRolePolicy-rds-list-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicy-rds-list-policy",
+            "uniqueId": "IAMRolePolicy-rds-list-policy"
+          }
+        },
+        "name": "rds-list-policy",
+        "policy": "{\"Statement\":[{\"Action\":[\"rds:DescribeDBInstances\",\"rds:ListTagsForResource\"],\"Effect\":\"Allow\",\"Resource\":\"arn:aws:rds:*:*:db:*\"}],\"Version\":\"2012-10-17\"}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "IAMRolePolicy-read-resource-tags-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicy-read-resource-tags-policy",
+            "uniqueId": "IAMRolePolicy-read-resource-tags-policy"
+          }
+        },
+        "name": "read-resource-tags-policy",
+        "policy": "{\"Statement\":[{\"Action\":\"tag:GetResources\",\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"2012-10-17\"}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "IAMRolePolicy-remote-management": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicy-remote-management",
+            "uniqueId": "IAMRolePolicy-remote-management"
+          }
+        },
+        "name": "remote-management",
+        "policy": "{\"Statement\":[{\"Action\":[\"sts:AssumeRole\",\"sts:TagSession\"],\"Effect\":\"Allow\",\"Resource\":\"arn:aws:iam::*:role/apono-*\",\"Sid\":\"assume\"}],\"Version\":\"2012-10-17\"}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "IAMRolePolicy-s3-list-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicy-s3-list-policy",
+            "uniqueId": "IAMRolePolicy-s3-list-policy"
+          }
+        },
+        "name": "s3-list-policy",
+        "policy": "{\"Statement\":[{\"Action\":[\"s3:GetBucketTagging\",\"s3:ListAllMyBuckets\",\"s3:ListBucket\",\"s3:GetBucketLocation\"],\"Effect\":\"Allow\",\"Resource\":\"arn:aws:s3:::*\"}],\"Version\":\"2012-10-17\"}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "IAMRolePolicy-ssm-params-list-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicy-ssm-params-list-policy",
+            "uniqueId": "IAMRolePolicy-ssm-params-list-policy"
+          }
+        },
+        "name": "ssm-params-list-policy",
+        "policy": "{\"Statement\":[{\"Action\":\"ssm:GetParameters*\",\"Effect\":\"Allow\",\"Resource\":\"arn:aws:ssm:*:*:parameter/*\"},{\"Action\":\"ssm:DescribeParameters\",\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"2012-10-17\"}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "IAMRolePolicy-sso-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicy-sso-policy",
+            "uniqueId": "IAMRolePolicy-sso-policy"
+          }
+        },
+        "name": "sso-policy",
+        "policy": "{\"Statement\":[{\"Action\":[\"organizations:ListAccounts\",\"tag:GetResources\",\"tag:GetTagValues\",\"sso:ListInstances\",\"identitystore:*\",\"tag:GetTagKeys\",\"sso:TagResource\",\"sso:UntagResource\",\"sso-directory:SearchUsers\"],\"Effect\":\"Allow\",\"Resource\":\"*\",\"Sid\":\"sso0\"},{\"Action\":[\"organizations:ListAccountsForParent\",\"sso:ListPermissionSets\",\"sso:CreateAccountAssignment\",\"sso:DescribeAccountAssignmentCreationStatus\",\"organizations:ListParents\",\"sso:DeleteAccountAssignment\",\"sso:DescribePermissionSet\",\"organizations:ListChildren\",\"sso:DescribeAccountAssignmentDeletionStatus\",\"sso:DeletePermissionSet\",\"sso:CreatePermissionSet\",\"sso:PutInlinePolicyToPermissionSet\",\"iam:CreateSAMLProvider\",\"iam:UpdateSAMLProvider\",\"iam:GetSAMLProvider\",\"sso:GetInlinePolicyForPermissionSet\",\"sso:DeleteInlinePolicyFromPermissionSet\",\"sso:ProvisionPermissionSet\",\"sso:AttachManagedPolicyToPermissionSet\",\"sso:DetachManagedPolicyFromPermissionSet\",\"sso:ListManagedPoliciesInPermissionSet\",\"sso:ListCustomerManagedPolicyReferencesInPermissionSet\",\"sso:AttachCustomerManagedPolicyReferenceToPermissionSet\",\"sso:DetachCustomerManagedPolicyReferenceFromPermissionSet\",\"sso:DescribePermissionSetProvisioningStatus\",\"sso:GetPermissionsBoundaryForPermissionSet\",\"sso:PutPermissionsBoundaryToPermissionSet\",\"sso:DeletePermissionsBoundaryFromPermissionSet\"],\"Effect\":\"Allow\",\"Resource\":[\"arn:aws:organizations::*:root/o-*/r-*\",\"arn:aws:organizations::*:ou/o-*/ou-*\",\"arn:aws:sso:::instance/*\",\"arn:aws:sso:::permissionSet/*/*\",\"arn:aws:sso:::account/*\",\"arn:aws:iam::*:saml-provider/*\"],\"Sid\":\"sso1\"}],\"Version\":\"2012-10-17\"}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      }
+    },
+    "aws_iam_role_policy_attachment": {
+      "EcsTaskExecutionIAMRolePolicyAttachment": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/EcsTaskExecutionIAMRolePolicyAttachment",
+            "uniqueId": "EcsTaskExecutionIAMRolePolicyAttachment"
+          }
+        },
+        "policy_arn": "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
+        "role": "${aws_iam_role.EcsTaskExecutionIAMRole.id}"
+      },
+      "IAMRolePolicyAttachment-arnawsiamawspolicy--AWSCloudFormationReadOnlyAccess": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicyAttachment-arn:aws:iam::aws:policy--AWSCloudFormationReadOnlyAccess",
+            "uniqueId": "IAMRolePolicyAttachment-arnawsiamawspolicy--AWSCloudFormationReadOnlyAccess"
+          }
+        },
+        "policy_arn": "arn:aws:iam::aws:policy/AWSCloudFormationReadOnlyAccess",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "IAMRolePolicyAttachment-arnawsiamawspolicy--AWSResourceExplorerReadOnlyAccess": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicyAttachment-arn:aws:iam::aws:policy--AWSResourceExplorerReadOnlyAccess",
+            "uniqueId": "IAMRolePolicyAttachment-arnawsiamawspolicy--AWSResourceExplorerReadOnlyAccess"
+          }
+        },
+        "policy_arn": "arn:aws:iam::aws:policy/AWSResourceExplorerReadOnlyAccess",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "IAMRolePolicyAttachment-arnawsiamawspolicy--SecurityAudit": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicyAttachment-arn:aws:iam::aws:policy--SecurityAudit",
+            "uniqueId": "IAMRolePolicyAttachment-arnawsiamawspolicy--SecurityAudit"
+          }
+        },
+        "policy_arn": "arn:aws:iam::aws:policy/SecurityAudit",
+        "role": "${aws_iam_role.IAMRole.id}"
+      }
+    },
+    "aws_lb": {
+      "NLB": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/NLB",
+            "uniqueId": "NLB"
+          }
+        },
+        "internal": "${(lower(var.nlbScheme) == \"internal\")}",
+        "load_balancer_type": "network",
+        "subnets": "${(length(var.nlbSubnetIds) >= 1) ? var.nlbSubnetIds : var.subnetIds}",
+        "tags": "${var.tags}"
+      }
+    },
+    "aws_lb_listener": {
+      "NLBListener10020": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/NLBListener10020",
+            "uniqueId": "NLBListener10020"
+          }
+        },
+        "default_action": [
+          {
+            "target_group_arn": "${aws_lb_target_group.NLBTargetGroup10020.arn}",
+            "type": "forward"
+          }
+        ],
+        "load_balancer_arn": "${aws_lb.NLB.arn}",
+        "port": 10020,
+        "protocol": "TCP",
+        "tags": "${var.tags}"
+      },
+      "NLBListener10021": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/NLBListener10021",
+            "uniqueId": "NLBListener10021"
+          }
+        },
+        "default_action": [
+          {
+            "target_group_arn": "${aws_lb_target_group.NLBTargetGroup10021.arn}",
+            "type": "forward"
+          }
+        ],
+        "load_balancer_arn": "${aws_lb.NLB.arn}",
+        "port": 10021,
+        "protocol": "TCP",
+        "tags": "${var.tags}"
+      },
+      "NLBListener10022": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/NLBListener10022",
+            "uniqueId": "NLBListener10022"
+          }
+        },
+        "default_action": [
+          {
+            "target_group_arn": "${aws_lb_target_group.NLBTargetGroup10022.arn}",
+            "type": "forward"
+          }
+        ],
+        "load_balancer_arn": "${aws_lb.NLB.arn}",
+        "port": 10022,
+        "protocol": "TCP",
+        "tags": "${var.tags}"
+      },
+      "NLBListener10023": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/NLBListener10023",
+            "uniqueId": "NLBListener10023"
+          }
+        },
+        "default_action": [
+          {
+            "target_group_arn": "${aws_lb_target_group.NLBTargetGroup10023.arn}",
+            "type": "forward"
+          }
+        ],
+        "load_balancer_arn": "${aws_lb.NLB.arn}",
+        "port": 10023,
+        "protocol": "TCP",
+        "tags": "${var.tags}"
+      },
+      "NLBListener10024": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/NLBListener10024",
+            "uniqueId": "NLBListener10024"
+          }
+        },
+        "default_action": [
+          {
+            "target_group_arn": "${aws_lb_target_group.NLBTargetGroup10024.arn}",
+            "type": "forward"
+          }
+        ],
+        "load_balancer_arn": "${aws_lb.NLB.arn}",
+        "port": 10024,
+        "protocol": "TCP",
+        "tags": "${var.tags}"
+      }
+    },
+    "aws_lb_target_group": {
+      "NLBTargetGroup10020": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/NLBTargetGroup10020",
+            "uniqueId": "NLBTargetGroup10020"
+          }
+        },
+        "deregistration_delay": "60",
+        "health_check": {
+          "healthy_threshold": 3,
+          "interval": 30,
+          "port": "8080",
+          "protocol": "TCP",
+          "unhealthy_threshold": 3
+        },
+        "port": 10020,
+        "protocol": "TCP",
+        "tags": "${var.tags}",
+        "target_type": "ip",
+        "vpc_id": "${var.vpcId}"
+      },
+      "NLBTargetGroup10021": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/NLBTargetGroup10021",
+            "uniqueId": "NLBTargetGroup10021"
+          }
+        },
+        "deregistration_delay": "60",
+        "health_check": {
+          "healthy_threshold": 3,
+          "interval": 30,
+          "port": "8080",
+          "protocol": "TCP",
+          "unhealthy_threshold": 3
+        },
+        "port": 10021,
+        "protocol": "TCP",
+        "tags": "${var.tags}",
+        "target_type": "ip",
+        "vpc_id": "${var.vpcId}"
+      },
+      "NLBTargetGroup10022": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/NLBTargetGroup10022",
+            "uniqueId": "NLBTargetGroup10022"
+          }
+        },
+        "deregistration_delay": "60",
+        "health_check": {
+          "healthy_threshold": 3,
+          "interval": 30,
+          "port": "8080",
+          "protocol": "TCP",
+          "unhealthy_threshold": 3
+        },
+        "port": 10022,
+        "protocol": "TCP",
+        "tags": "${var.tags}",
+        "target_type": "ip",
+        "vpc_id": "${var.vpcId}"
+      },
+      "NLBTargetGroup10023": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/NLBTargetGroup10023",
+            "uniqueId": "NLBTargetGroup10023"
+          }
+        },
+        "deregistration_delay": "60",
+        "health_check": {
+          "healthy_threshold": 3,
+          "interval": 30,
+          "port": "8080",
+          "protocol": "TCP",
+          "unhealthy_threshold": 3
+        },
+        "port": 10023,
+        "protocol": "TCP",
+        "tags": "${var.tags}",
+        "target_type": "ip",
+        "vpc_id": "${var.vpcId}"
+      },
+      "NLBTargetGroup10024": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/NLBTargetGroup10024",
+            "uniqueId": "NLBTargetGroup10024"
+          }
+        },
+        "deregistration_delay": "60",
+        "health_check": {
+          "healthy_threshold": 3,
+          "interval": 30,
+          "port": "8080",
+          "protocol": "TCP",
+          "unhealthy_threshold": 3
+        },
+        "port": 10024,
+        "protocol": "TCP",
+        "tags": "${var.tags}",
+        "target_type": "ip",
+        "vpc_id": "${var.vpcId}"
+      }
+    },
+    "aws_secretsmanager_secret": {
+      "AponoTokenSecret": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/AponoTokenSecret",
+            "uniqueId": "AponoTokenSecret"
+          }
+        },
+        "description": "Apono Connector token",
+        "name": "apono-connector-token-${random_id.stackId.id}",
+        "tags": "${var.tags}"
+      },
+      "ECSImageCredentials": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/ECSImageCredentials",
+            "uniqueId": "ECSImageCredentials"
+          }
+        },
+        "description": "Apono Connector docker registry credentials",
+        "name": "apono-connector-registry-credentials-${random_id.stackId.id}",
+        "tags": "${var.tags}"
+      }
+    },
+    "aws_secretsmanager_secret_version": {
+      "AponoTokenSecretVersion": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/AponoTokenSecretVersion",
+            "uniqueId": "AponoTokenSecretVersion"
+          }
+        },
+        "secret_id": "${aws_secretsmanager_secret.AponoTokenSecret.id}",
+        "secret_string": "${var.aponoToken}"
+      },
+      "ECSImageCredentialsVersion": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/ECSImageCredentialsVersion",
+            "uniqueId": "ECSImageCredentialsVersion"
+          }
+        },
+        "secret_id": "${aws_secretsmanager_secret.ECSImageCredentials.id}",
+        "secret_string": "{\"username\": \"apono\", \"password\": \"${var.aponoToken}\"}"
+      }
+    },
+    "aws_security_group": {
+      "SecurityGroup": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/SecurityGroup",
+            "uniqueId": "SecurityGroup"
+          }
+        },
+        "egress": [
+          {
+            "cidr_blocks": [
+              "0.0.0.0/0"
+            ],
+            "description": null,
+            "from_port": 0,
+            "ipv6_cidr_blocks": null,
+            "prefix_list_ids": null,
+            "protocol": "-1",
+            "security_groups": null,
+            "self": null,
+            "to_port": 0
+          }
+        ],
+        "name": "apono-connector-sg-${random_id.stackId.id}",
+        "tags": "${var.tags}",
+        "vpc_id": "${var.vpcId}"
+      }
+    },
+    "aws_vpc_security_group_ingress_rule": {
+      "SGIngressConnectorHealthCheck": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/SGIngressConnectorHealthCheck",
+            "uniqueId": "SGIngressConnectorHealthCheck"
+          }
+        },
+        "cidr_ipv4": "0.0.0.0/0",
+        "from_port": 8080,
+        "ip_protocol": "tcp",
+        "security_group_id": "${aws_security_group.SecurityGroup.id}",
+        "tags": "${var.tags}",
+        "to_port": 8080
+      },
+      "SGIngressNlbPorts": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/SGIngressNlbPorts",
+            "uniqueId": "SGIngressNlbPorts"
+          }
+        },
+        "cidr_ipv4": "0.0.0.0/0",
+        "from_port": 10020,
+        "ip_protocol": "tcp",
+        "security_group_id": "${aws_security_group.SecurityGroup.id}",
+        "tags": "${var.tags}",
+        "to_port": 10024
+      }
+    },
+    "random_id": {
+      "stackId": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/stackId",
+            "uniqueId": "stackId"
+          }
+        },
+        "byte_length": 8
+      }
+    }
+  },
+  "terraform": {
+    "required_providers": {
+      "aws": {
+        "source": "aws",
+        "version": "~> 6.0"
+      },
+      "random": {
+        "source": "hashicorp/random",
+        "version": "~> 3.1"
+      }
+    }
+  },
+  "variable": {
+    "aponoToken": [
+      {
+        "type": "string"
+      }
+    ],
+    "assignPublicIp": [
+      {
+        "default": true,
+        "description": "Assign public IP for the ECS task (needed when installed to subnet with internet gateway)",
+        "type": "bool"
+      }
+    ],
+    "connectorId": [
+      {
+        "default": "apono-connector",
+        "type": "string"
+      }
+    ],
+    "logGroupRetentionInDays": [
+      {
+        "default": 30,
+        "description": "Number of days to retain log group logs",
+        "type": "number"
+      }
+    ],
+    "nlbScheme": [
+      {
+        "default": "internal",
+        "description": "NLB scheme for session audit. Accepts \"internal\" or \"internet-facing\" (case-insensitive).",
+        "type": "string",
+        "validation": [
+          {
+            "condition": "${contains([\"internal\", \"internet-facing\"], lower(var.nlbScheme))}",
+            "error_message": "nlbScheme must be \"internal\" or \"internet-facing\" (case-insensitive)."
+          }
+        ]
+      }
+    ],
+    "nlbSubnetIds": [
+      {
+        "default": [
+        ],
+        "description": "Subnets for the NLB. Falls back to subnetIds if empty",
+        "type": "list"
+      }
+    ],
+    "numberOfInstances": [
+      {
+        "default": 1,
+        "description": "Number of connector instances",
+        "type": "number"
+      }
+    ],
+    "roleName": [
+      {
+        "default": null,
+        "description": "Optional name for the connector IAM role. Defaults to apono-connector-role-<stack-id>",
+        "type": "string"
+      }
+    ],
+    "subnetIds": [
+      {
+        "type": "list"
+      }
+    ],
+    "tags": [
+      {
+        "default": {
+        },
+        "description": "Map of tags for the created resources",
+        "type": "map(string)"
+      }
+    ],
+    "vpcId": [
+      {
+        "type": "string"
+      }
+    ]
+  }
+}
