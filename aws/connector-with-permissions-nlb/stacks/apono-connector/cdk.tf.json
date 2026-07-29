@@ -893,8 +893,8 @@
     ],
     "enableNlbSecurityGroup": [
       {
-        "default": false,
-        "description": "When true, a dedicated security group is attached to the NLB and connector ingress is restricted to that security group. When false, the NLB is created without a security group and connector ingress is open to 0.0.0.0/0 on the session audit ports (legacy behavior). Defaults to false so that deployments created before the NLB security group existed are not affected on re-apply: the security group is attached at creation time, so enabling it on an existing NLB replaces the NLB and changes its DNS name. New deployments should set this to true.",
+        "default": true,
+        "description": "When true (default), a dedicated security group is attached to the NLB and connector ingress is restricted to that security group. When false, the NLB is created without a security group and connector ingress is open to 0.0.0.0/0 on the session audit ports (legacy behavior). The security group is attached at NLB creation time and AWS cannot add one to an existing NLB, so deployments created before this module version must either replace the NLB (terraform apply -replace='module.<name>.aws_lb.NLB', which changes its DNS name) or set this to false to keep the legacy open ingress.",
         "type": "bool"
       }
     ],
