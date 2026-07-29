@@ -454,6 +454,7 @@
         },
         "internal": "${(lower(var.nlbScheme) == \"internal\")}",
         "load_balancer_type": "network",
+        "security_groups": "${var.enableNlbSecurityGroup ? [aws_security_group.NLBSecurityGroup[0].id] : null}",
         "subnets": "${(length(var.nlbSubnetIds) >= 1) ? var.nlbSubnetIds : var.subnetIds}",
         "tags": "${var.tags}"
       }
@@ -704,6 +705,60 @@
       }
     },
     "aws_security_group": {
+      "NLBSecurityGroup": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/NLBSecurityGroup",
+            "uniqueId": "NLBSecurityGroup"
+          }
+        },
+        "count": "${var.enableNlbSecurityGroup ? 1 : 0}",
+        "description": "Controls which sources are allowed to reach the Apono connector NLB on the session audit ports",
+        "egress": [
+          {
+            "cidr_blocks": null,
+            "description": null,
+            "from_port": 10020,
+            "ipv6_cidr_blocks": null,
+            "prefix_list_ids": null,
+            "protocol": "tcp",
+            "security_groups": [
+              "${aws_security_group.SecurityGroup.id}"
+            ],
+            "self": null,
+            "to_port": 10024
+          },
+          {
+            "cidr_blocks": null,
+            "description": null,
+            "from_port": 8080,
+            "ipv6_cidr_blocks": null,
+            "prefix_list_ids": null,
+            "protocol": "tcp",
+            "security_groups": [
+              "${aws_security_group.SecurityGroup.id}"
+            ],
+            "self": null,
+            "to_port": 8080
+          }
+        ],
+        "ingress": [
+          {
+            "cidr_blocks": "${var.nlbIngressCidrs}",
+            "description": null,
+            "from_port": 10020,
+            "ipv6_cidr_blocks": null,
+            "prefix_list_ids": null,
+            "protocol": "tcp",
+            "security_groups": null,
+            "self": null,
+            "to_port": 10024
+          }
+        ],
+        "name": "apono-connector-nlb-sg-${random_id.stackId.id}",
+        "tags": "${var.tags}",
+        "vpc_id": "${var.vpcId}"
+      },
       "SecurityGroup": {
         "//": {
           "metadata": {
@@ -739,7 +794,23 @@
             "uniqueId": "SGIngressConnectorHealthCheck"
           }
         },
+        "count": "${var.enableNlbSecurityGroup ? 1 : 0}",
+        "from_port": 8080,
+        "ip_protocol": "tcp",
+        "referenced_security_group_id": "${aws_security_group.NLBSecurityGroup[0].id}",
+        "security_group_id": "${aws_security_group.SecurityGroup.id}",
+        "tags": "${var.tags}",
+        "to_port": 8080
+      },
+      "SGIngressConnectorHealthCheckOpen": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/SGIngressConnectorHealthCheckOpen",
+            "uniqueId": "SGIngressConnectorHealthCheckOpen"
+          }
+        },
         "cidr_ipv4": "0.0.0.0/0",
+        "count": "${var.enableNlbSecurityGroup ? 0 : 1}",
         "from_port": 8080,
         "ip_protocol": "tcp",
         "security_group_id": "${aws_security_group.SecurityGroup.id}",
@@ -753,7 +824,23 @@
             "uniqueId": "SGIngressNlbPorts"
           }
         },
+        "count": "${var.enableNlbSecurityGroup ? 1 : 0}",
+        "from_port": 10020,
+        "ip_protocol": "tcp",
+        "referenced_security_group_id": "${aws_security_group.NLBSecurityGroup[0].id}",
+        "security_group_id": "${aws_security_group.SecurityGroup.id}",
+        "tags": "${var.tags}",
+        "to_port": 10024
+      },
+      "SGIngressNlbPortsOpen": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/SGIngressNlbPortsOpen",
+            "uniqueId": "SGIngressNlbPortsOpen"
+          }
+        },
         "cidr_ipv4": "0.0.0.0/0",
+        "count": "${var.enableNlbSecurityGroup ? 0 : 1}",
         "from_port": 10020,
         "ip_protocol": "tcp",
         "security_group_id": "${aws_security_group.SecurityGroup.id}",
@@ -804,11 +891,27 @@
         "type": "string"
       }
     ],
+    "enableNlbSecurityGroup": [
+      {
+        "default": false,
+        "description": "When true, a dedicated security group is attached to the NLB and connector ingress is restricted to that security group. When false, the NLB is created without a security group and connector ingress is open to 0.0.0.0/0 on the session audit ports (legacy behavior). Defaults to false so that deployments created before the NLB security group existed are not affected on re-apply: the security group is attached at creation time, so enabling it on an existing NLB replaces the NLB and changes its DNS name. New deployments should set this to true.",
+        "type": "bool"
+      }
+    ],
     "logGroupRetentionInDays": [
       {
         "default": 30,
         "description": "Number of days to retain log group logs",
         "type": "number"
+      }
+    ],
+    "nlbIngressCidrs": [
+      {
+        "default": [
+          "0.0.0.0/0"
+        ],
+        "description": "CIDR ranges allowed to reach the NLB on the session audit ports (10020-10024). Note: the NLB security group is attached at creation time - applying this module version to an existing deployment replaces the NLB and changes its DNS name.",
+        "type": "list(string)"
       }
     ],
     "nlbScheme": [
