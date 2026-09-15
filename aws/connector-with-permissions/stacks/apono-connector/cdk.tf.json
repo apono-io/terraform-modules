@@ -220,6 +220,17 @@
         "policy": "{\"Statement\":[{\"Action\":\"s3:GetObject\",\"Effect\":\"Allow\",\"Resource\":\"arn:aws:s3:::aws-cloudtrail-logs-apono-*/*\"}],\"Version\":\"2012-10-17\"}",
         "role": "${aws_iam_role.IAMRole.id}"
       },
+      "IAMRolePolicy-apono-ec2-instance-user": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicy-apono-ec2-instance-user",
+            "uniqueId": "IAMRolePolicy-apono-ec2-instance-user"
+          }
+        },
+        "name": "apono-ec2-instance-user",
+        "policy": "{\"Statement\":[{\"Action\":\"ssm:SendCommand\",\"Effect\":\"Allow\",\"Resource\":[\"arn:aws:ssm:*:*:document/AWSFleetManager-CreateUser\",\"arn:aws:ssm:*:*:document/AWSFleetManager-CreateGroup\",\"arn:aws:ssm:*:*:document/AWSFleetManager-AddUsersToGroups\",\"arn:aws:ssm:*:*:document/AWSFleetManager-RemoveUsersFromGroups\",\"arn:aws:ssm:*:*:document/AWSFleetManager-DeleteUser\",\"arn:aws:ec2:*:*:instance/*\"]},{\"Action\":\"ssm:GetCommandInvocation\",\"Effect\":\"Allow\",\"Resource\":\"*\"},{\"Action\":[\"ssm:CreateDocument\",\"ssm:DeleteDocument\",\"ssm:AddTagsToResource\",\"ssm:RemoveTagsFromResource\"],\"Effect\":\"Allow\",\"Resource\":\"arn:aws:ssm:*:*:document/Apono-Connect-*\"},{\"Action\":\"ssm:TerminateSession\",\"Effect\":\"Allow\",\"Resource\":\"arn:aws:ssm:*:*:session/*\"}],\"Version\":\"2012-10-17\"}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
       "IAMRolePolicy-apono-tagged-keys-access-policy": {
         "//": {
           "metadata": {
