@@ -1,0 +1,449 @@
+{
+  "//": {
+    "metadata": {
+      "backend": "local",
+      "stackName": "apono-cross-account-role",
+      "version": "0.21.0"
+    },
+    "outputs": {
+      "apono-cross-account-role": {
+        "role_arn": "role_arn"
+      }
+    }
+  },
+  "output": {
+    "role_arn": {
+      "value": "${aws_iam_role.IAMRole.arn}"
+    }
+  },
+  "resource": {
+    "aws_iam_role": {
+      "IAMRole": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/IAMRole",
+            "uniqueId": "IAMRole"
+          }
+        },
+        "assume_role_policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"1\",\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"${var.connectorRoleArn}\"},\"Action\":[\"sts:AssumeRole\",\"sts:TagSession\"]}]}",
+        "max_session_duration": 3600,
+        "name": "apono-cross-account-${var.connectorId}",
+        "path": "/",
+        "tags": "${var.tags}"
+      }
+    },
+    "aws_iam_role_policy": {
+      "FullAccessIAMRolePolicy-AponoConnectorLogsRead": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/FullAccessIAMRolePolicy-AponoConnectorLogsRead",
+            "uniqueId": "FullAccessIAMRolePolicy-AponoConnectorLogsRead"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Full-Access (Manage IAM)\") ? 1 : 0}",
+        "name": "AponoConnectorLogsRead",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"logs:DescribeLogStreams\", \"logs:GetLogEvents\"], \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:logs:*:*:log-group:/ecs/apono-connector-logs-*:*\", \"Sid\" = \"AllowReadingAponoConnectorLogs\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "FullAccessIAMRolePolicy-AponoDescribePolicy": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/FullAccessIAMRolePolicy-AponoDescribePolicy",
+            "uniqueId": "FullAccessIAMRolePolicy-AponoDescribePolicy"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Full-Access (Manage IAM)\") ? 1 : 0}",
+        "name": "AponoDescribePolicy",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"ecr:GetLifecyclePolicy\", \"lambda:Get*\", \"s3:ListBucket\", \"sns:GetSubscriptionAttributes\", \"dynamodb:ListTagsOfResource\", \"sns:ListTagsForResource\", \"es:ListTags\", \"rds:DescribeDBClusters\"], \"Effect\" = \"Allow\", \"Resource\" = \"*\", \"Sid\" = \"AllowDescribingResources\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "FullAccessIAMRolePolicy-account-access-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/FullAccessIAMRolePolicy-account-access-policy",
+            "uniqueId": "FullAccessIAMRolePolicy-account-access-policy"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Full-Access (Manage IAM)\") ? 1 : 0}",
+        "name": "account-access-policy",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"account-access:ListApplications\", \"account-access:GetApplication\", \"account-access:ListEntitlements\", \"account-access:GetEntitlement\", \"account-access:CreateEntitlement\", \"account-access:DeleteEntitlement\", \"account-access:ListTagsForResource\", \"account-access:TagResource\", \"account-access:UntagResource\"], \"Effect\" = \"Allow\", \"Resource\" = \"*\", \"Sid\" = \"accountAccess0\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "FullAccessIAMRolePolicy-apono-cloudtrail-logs-s3-access-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/FullAccessIAMRolePolicy-apono-cloudtrail-logs-s3-access-policy",
+            "uniqueId": "FullAccessIAMRolePolicy-apono-cloudtrail-logs-s3-access-policy"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Full-Access (Manage IAM)\") ? 1 : 0}",
+        "name": "apono-cloudtrail-logs-s3-access-policy",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = \"s3:GetObject\", \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:s3:::aws-cloudtrail-logs-apono-*/*\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "FullAccessIAMRolePolicy-apono-ec2-instance-user": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/FullAccessIAMRolePolicy-apono-ec2-instance-user",
+            "uniqueId": "FullAccessIAMRolePolicy-apono-ec2-instance-user"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Full-Access (Manage IAM)\") ? 1 : 0}",
+        "name": "apono-ec2-instance-user",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = \"ssm:SendCommand\", \"Effect\" = \"Allow\", \"Resource\" = [\"arn:aws:ssm:*:*:document/AWSFleetManager-CreateUser\", \"arn:aws:ssm:*:*:document/AWSFleetManager-CreateGroup\", \"arn:aws:ssm:*:*:document/AWSFleetManager-AddUsersToGroups\", \"arn:aws:ssm:*:*:document/AWSFleetManager-RemoveUsersFromGroups\", \"arn:aws:ssm:*:*:document/AWSFleetManager-DeleteUser\", \"arn:aws:ec2:*:*:instance/*\"]}, {\"Action\" = \"ssm:GetCommandInvocation\", \"Effect\" = \"Allow\", \"Resource\" = \"*\"}, {\"Action\" = [\"ssm:CreateDocument\", \"ssm:DeleteDocument\", \"ssm:AddTagsToResource\", \"ssm:RemoveTagsFromResource\"], \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:ssm:*:*:document/Apono-Connect-*\"}, {\"Action\" = \"ssm:TerminateSession\", \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:ssm:*:*:session/*\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "FullAccessIAMRolePolicy-apono-tagged-keys-access-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/FullAccessIAMRolePolicy-apono-tagged-keys-access-policy",
+            "uniqueId": "FullAccessIAMRolePolicy-apono-tagged-keys-access-policy"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Full-Access (Manage IAM)\") ? 1 : 0}",
+        "name": "apono-tagged-keys-access-policy",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = \"kms:Sign\", \"Condition\" = {\"StringEquals\" = {\"aws:ResourceTag/apono-connector-read\" = \"true\"}}, \"Effect\" = \"Allow\", \"Resource\" = \"*\"}, {\"Action\" = \"kms:Decrypt\", \"Condition\" = {\"StringEquals\" = {\"aws:ResourceTag/apono-connector-access\" = \"true\"}}, \"Effect\" = \"Allow\", \"Resource\" = \"*\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "FullAccessIAMRolePolicy-apono-tagged-lambda-functions-access-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/FullAccessIAMRolePolicy-apono-tagged-lambda-functions-access-policy",
+            "uniqueId": "FullAccessIAMRolePolicy-apono-tagged-lambda-functions-access-policy"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Full-Access (Manage IAM)\") ? 1 : 0}",
+        "name": "apono-tagged-lambda-functions-access-policy",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"lambda:InvokeFunction\", \"lambda:GetFunction\"], \"Condition\" = {\"StringEquals\" = {\"aws:ResourceTag/apono-connector-access\" = \"true\"}}, \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:lambda:*:*:function:*\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "FullAccessIAMRolePolicy-apono-tagged-secrets-access-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/FullAccessIAMRolePolicy-apono-tagged-secrets-access-policy",
+            "uniqueId": "FullAccessIAMRolePolicy-apono-tagged-secrets-access-policy"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Full-Access (Manage IAM)\") ? 1 : 0}",
+        "name": "apono-tagged-secrets-access-policy",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"secretsmanager:GetSecretValue\", \"secretsmanager:DescribeSecret\"], \"Condition\" = {\"StringEquals\" = {\"aws:ResourceTag/apono-connector-read\" = \"true\"}}, \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:secretsmanager:*:*:secret:*\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "FullAccessIAMRolePolicy-ec2-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/FullAccessIAMRolePolicy-ec2-policy",
+            "uniqueId": "FullAccessIAMRolePolicy-ec2-policy"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Full-Access (Manage IAM)\") ? 1 : 0}",
+        "name": "ec2-policy",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"ec2:DescribeInstances\", \"ec2:DescribeTags\"], \"Effect\" = \"Allow\", \"Resource\" = \"*\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "FullAccessIAMRolePolicy-ecr-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/FullAccessIAMRolePolicy-ecr-policy",
+            "uniqueId": "FullAccessIAMRolePolicy-ecr-policy"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Full-Access (Manage IAM)\") ? 1 : 0}",
+        "name": "ecr-policy",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"ecr:DescribeImages\", \"ecr:DescribeRepositories\"], \"Effect\" = \"Allow\", \"Resource\" = \"*\", \"Sid\" = \"assume\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "FullAccessIAMRolePolicy-eks-read-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/FullAccessIAMRolePolicy-eks-read-policy",
+            "uniqueId": "FullAccessIAMRolePolicy-eks-read-policy"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Full-Access (Manage IAM)\") ? 1 : 0}",
+        "name": "eks-read-policy",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"eks:AccessKubernetesApi\", \"eks:ListTagsForResource\", \"eks:ListAccessEntries\", \"eks:DescribeAccessEntry\", \"eks:ListAssociatedAccessPolicies\", \"eks:DescribeCluster\", \"eks:ListAccessPolicies\", \"eks:ListClusters\"], \"Effect\" = \"Allow\", \"Resource\" = \"*\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "FullAccessIAMRolePolicy-eks-write-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/FullAccessIAMRolePolicy-eks-write-policy",
+            "uniqueId": "FullAccessIAMRolePolicy-eks-write-policy"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Full-Access (Manage IAM)\") ? 1 : 0}",
+        "name": "eks-write-policy",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"eks:DeleteAccessEntry\", \"eks:UntagResource\", \"eks:AssociateAccessPolicy\", \"eks:DisassociateAccessPolicy\", \"eks:TagResource\", \"eks:CreateAccessEntry\", \"eks:UpdateAccessEntry\"], \"Effect\" = \"Allow\", \"Resource\" = \"*\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "FullAccessIAMRolePolicy-iam-access-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/FullAccessIAMRolePolicy-iam-access-policy",
+            "uniqueId": "FullAccessIAMRolePolicy-iam-access-policy"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Full-Access (Manage IAM)\") ? 1 : 0}",
+        "name": "iam-access-policy",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"iam:ListPolicies\", \"iam:CreateInstanceProfile\", \"iam:ListGroups\", \"iam:ListInstanceProfiles\", \"iam:ListRoles\"], \"Effect\" = \"Allow\", \"Resource\" = \"*\"}, {\"Action\" = [\"iam:CreateInstanceProfile\", \"iam:GetRole\", \"iam:UpdateAssumeRolePolicy\", \"iam:ListRoleTags\", \"iam:TagRole\", \"iam:UntagRole\", \"iam:CreateRole\", \"iam:DeleteRole\", \"iam:AttachRolePolicy\", \"iam:PutRolePolicy\", \"iam:AddRoleToInstanceProfile\", \"iam:ListInstanceProfilesForRole\", \"iam:DetachRolePolicy\", \"iam:ListAttachedRolePolicies\", \"iam:DeleteRolePolicy\", \"iam:ListAttachedGroupPolicies\", \"iam:ListRolePolicies\", \"iam:GetRolePolicy\", \"iam:PassRole\", \"iam:GetInstanceProfile\", \"iam:CreateUser\", \"iam:CreateAccessKey\", \"iam:DeleteAccessKey\", \"iam:PutUserPolicy\", \"iam:DeleteUserPolicy\", \"iam:GetUser\", \"iam:GetUserPolicy\", \"iam:DeleteUser\", \"iam:ListAttachedUserPolicies\", \"iam:ListUserPolicies\", \"iam:UpdateLoginProfile\", \"iam:ListAccessKeys\", \"iam:AttachUserPolicy\", \"iam:DetachUserPolicy\", \"iam:CreateLoginProfile\", \"iam:CreateServiceLinkedRole\", \"iam:GetPolicy\", \"iam:GetPolicyVersion\", \"iam:ListGroupPolicies\", \"iam:GetGroupPolicy\", \"iam:PutRolePermissionsBoundary\", \"iam:DeleteRolePermissionsBoundary\", \"iam:PutUserPermissionsBoundary\", \"iam:DeleteUserPermissionsBoundary\", \"iam:TagUser\", \"iam:ListUserTags\", \"iam:UpdateRole\", \"iam:CreatePolicy\", \"iam:DeletePolicy\", \"iam:CreatePolicyVersion\", \"iam:ListPolicyVersions\", \"iam:DeletePolicyVersion\", \"iam:TagPolicy\"], \"Effect\" = \"Allow\", \"Resource\" = [\"arn:aws:iam::*:instance-profile/*\", \"arn:aws:iam::*:role/*\", \"arn:aws:iam::*:group/*\", \"arn:aws:iam::*:user/*\", \"arn:aws:iam::*:policy/*\"]}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "FullAccessIAMRolePolicy-rds-connect": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/FullAccessIAMRolePolicy-rds-connect",
+            "uniqueId": "FullAccessIAMRolePolicy-rds-connect"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Full-Access (Manage IAM)\") ? 1 : 0}",
+        "name": "rds-connect",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = \"rds-db:connect\", \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:rds-db:*:*:dbuser:*/apono_connector\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "FullAccessIAMRolePolicy-rds-list-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/FullAccessIAMRolePolicy-rds-list-policy",
+            "uniqueId": "FullAccessIAMRolePolicy-rds-list-policy"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Full-Access (Manage IAM)\") ? 1 : 0}",
+        "name": "rds-list-policy",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"rds:DescribeDBInstances\", \"rds:ListTagsForResource\"], \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:rds:*:*:db:*\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "FullAccessIAMRolePolicy-read-resource-tags-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/FullAccessIAMRolePolicy-read-resource-tags-policy",
+            "uniqueId": "FullAccessIAMRolePolicy-read-resource-tags-policy"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Full-Access (Manage IAM)\") ? 1 : 0}",
+        "name": "read-resource-tags-policy",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = \"tag:GetResources\", \"Effect\" = \"Allow\", \"Resource\" = \"*\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "FullAccessIAMRolePolicy-remote-management": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/FullAccessIAMRolePolicy-remote-management",
+            "uniqueId": "FullAccessIAMRolePolicy-remote-management"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Full-Access (Manage IAM)\") ? 1 : 0}",
+        "name": "remote-management",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"sts:AssumeRole\", \"sts:TagSession\"], \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:iam::*:role/apono-*\", \"Sid\" = \"assume\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "FullAccessIAMRolePolicy-s3-list-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/FullAccessIAMRolePolicy-s3-list-policy",
+            "uniqueId": "FullAccessIAMRolePolicy-s3-list-policy"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Full-Access (Manage IAM)\") ? 1 : 0}",
+        "name": "s3-list-policy",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"s3:GetBucketTagging\", \"s3:ListAllMyBuckets\", \"s3:ListBucket\", \"s3:GetBucketLocation\"], \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:s3:::*\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "FullAccessIAMRolePolicy-ssm-params-list-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/FullAccessIAMRolePolicy-ssm-params-list-policy",
+            "uniqueId": "FullAccessIAMRolePolicy-ssm-params-list-policy"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Full-Access (Manage IAM)\") ? 1 : 0}",
+        "name": "ssm-params-list-policy",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = \"ssm:GetParameters*\", \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:ssm:*:*:parameter/*\"}, {\"Action\" = \"ssm:DescribeParameters\", \"Effect\" = \"Allow\", \"Resource\" = \"*\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "FullAccessIAMRolePolicy-sso-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/FullAccessIAMRolePolicy-sso-policy",
+            "uniqueId": "FullAccessIAMRolePolicy-sso-policy"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Full-Access (Manage IAM)\") ? 1 : 0}",
+        "name": "sso-policy",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"organizations:ListAccounts\", \"tag:GetResources\", \"tag:GetTagValues\", \"sso:ListInstances\", \"identitystore:GetUserId\", \"identitystore:DescribeUser\", \"identitystore:DescribeGroup\", \"identitystore:ListGroupMemberships\", \"identitystore:ListGroupMembershipsForMember\", \"tag:GetTagKeys\", \"sso:TagResource\", \"sso:UntagResource\", \"sso-directory:SearchUsers\"], \"Effect\" = \"Allow\", \"Resource\" = \"*\", \"Sid\" = \"sso0\"}, {\"Action\" = [\"organizations:ListAccountsForParent\", \"sso:ListPermissionSets\", \"sso:CreateAccountAssignment\", \"sso:DescribeAccountAssignmentCreationStatus\", \"organizations:ListParents\", \"sso:DeleteAccountAssignment\", \"sso:DescribePermissionSet\", \"organizations:ListChildren\", \"sso:DescribeAccountAssignmentDeletionStatus\", \"sso:DeletePermissionSet\", \"sso:CreatePermissionSet\", \"sso:PutInlinePolicyToPermissionSet\", \"iam:CreateSAMLProvider\", \"iam:UpdateSAMLProvider\", \"iam:GetSAMLProvider\", \"sso:GetInlinePolicyForPermissionSet\", \"sso:DeleteInlinePolicyFromPermissionSet\", \"sso:ProvisionPermissionSet\", \"sso:AttachManagedPolicyToPermissionSet\", \"sso:DetachManagedPolicyFromPermissionSet\", \"sso:ListManagedPoliciesInPermissionSet\", \"sso:ListCustomerManagedPolicyReferencesInPermissionSet\", \"sso:AttachCustomerManagedPolicyReferenceToPermissionSet\", \"sso:DetachCustomerManagedPolicyReferenceFromPermissionSet\", \"sso:DescribePermissionSetProvisioningStatus\", \"sso:GetPermissionsBoundaryForPermissionSet\", \"sso:PutPermissionsBoundaryToPermissionSet\", \"sso:DeletePermissionsBoundaryFromPermissionSet\"], \"Effect\" = \"Allow\", \"Resource\" = [\"arn:aws:organizations::*:root/o-*/r-*\", \"arn:aws:organizations::*:ou/o-*/ou-*\", \"arn:aws:sso:::instance/*\", \"arn:aws:sso:::permissionSet/*/*\", \"arn:aws:iam::*:saml-provider/*\"], \"Sid\" = \"sso1\"}, {\"Action\" = [\"sso:CreateAccountAssignment\", \"sso:DeleteAccountAssignment\", \"sso:ProvisionPermissionSet\"], \"Effect\" = \"Allow\", \"Resource\" = [\"arn:aws:sso:::account/*\"], \"Sid\" = \"sso2\"}, {\"Action\" = [\"iam:AttachRolePolicy\", \"iam:CreateRole\", \"iam:DeleteRolePermissionsBoundary\", \"iam:PutRolePermissionsBoundary\", \"iam:PutRolePolicy\", \"iam:UpdateRole\", \"iam:UpdateRoleDescription\", \"iam:UpdateAssumeRolePolicy\"], \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:iam::*:role/aws-reserved/sso.amazonaws.com/*\", \"Sid\" = \"sso3\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "ReadOnlyIAMRolePolicy-AponoDescribePolicy": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/ReadOnlyIAMRolePolicy-AponoDescribePolicy",
+            "uniqueId": "ReadOnlyIAMRolePolicy-AponoDescribePolicy"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Read-Only (Discovery)\") ? 1 : 0}",
+        "name": "AponoDescribePolicy",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"ecr:GetLifecyclePolicy\", \"lambda:Get*\", \"s3:ListBucket\", \"sns:GetSubscriptionAttributes\", \"dynamodb:ListTagsOfResource\", \"sns:ListTagsForResource\", \"es:ListTags\", \"rds:DescribeDBClusters\"], \"Effect\" = \"Allow\", \"Resource\" = \"*\", \"Sid\" = \"AllowDescribingResources\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "ReadOnlyIAMRolePolicy-ec2-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/ReadOnlyIAMRolePolicy-ec2-policy",
+            "uniqueId": "ReadOnlyIAMRolePolicy-ec2-policy"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Read-Only (Discovery)\") ? 1 : 0}",
+        "name": "ec2-policy",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"ec2:DescribeInstances\", \"ec2:DescribeTags\"], \"Effect\" = \"Allow\", \"Resource\" = \"*\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "ReadOnlyIAMRolePolicy-ecr-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/ReadOnlyIAMRolePolicy-ecr-policy",
+            "uniqueId": "ReadOnlyIAMRolePolicy-ecr-policy"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Read-Only (Discovery)\") ? 1 : 0}",
+        "name": "ecr-policy",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"ecr:DescribeImages\", \"ecr:DescribeRepositories\"], \"Effect\" = \"Allow\", \"Resource\" = \"*\", \"Sid\" = \"assume\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "ReadOnlyIAMRolePolicy-eks-read-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/ReadOnlyIAMRolePolicy-eks-read-policy",
+            "uniqueId": "ReadOnlyIAMRolePolicy-eks-read-policy"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Read-Only (Discovery)\") ? 1 : 0}",
+        "name": "eks-read-policy",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"eks:AccessKubernetesApi\", \"eks:ListTagsForResource\", \"eks:ListAccessEntries\", \"eks:DescribeAccessEntry\", \"eks:ListAssociatedAccessPolicies\", \"eks:DescribeCluster\", \"eks:ListAccessPolicies\", \"eks:ListClusters\"], \"Effect\" = \"Allow\", \"Resource\" = \"*\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "ReadOnlyIAMRolePolicy-rds-list-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/ReadOnlyIAMRolePolicy-rds-list-policy",
+            "uniqueId": "ReadOnlyIAMRolePolicy-rds-list-policy"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Read-Only (Discovery)\") ? 1 : 0}",
+        "name": "rds-list-policy",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"rds:DescribeDBInstances\", \"rds:ListTagsForResource\"], \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:rds:*:*:db:*\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "ReadOnlyIAMRolePolicy-read-resource-tags-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/ReadOnlyIAMRolePolicy-read-resource-tags-policy",
+            "uniqueId": "ReadOnlyIAMRolePolicy-read-resource-tags-policy"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Read-Only (Discovery)\") ? 1 : 0}",
+        "name": "read-resource-tags-policy",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = \"tag:GetResources\", \"Effect\" = \"Allow\", \"Resource\" = \"*\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "ReadOnlyIAMRolePolicy-s3-list-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/ReadOnlyIAMRolePolicy-s3-list-policy",
+            "uniqueId": "ReadOnlyIAMRolePolicy-s3-list-policy"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Read-Only (Discovery)\") ? 1 : 0}",
+        "name": "s3-list-policy",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"s3:GetBucketTagging\", \"s3:ListAllMyBuckets\", \"s3:ListBucket\", \"s3:GetBucketLocation\"], \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:s3:::*\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "ReadOnlyIAMRolePolicy-ssm-params-list-policy": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/ReadOnlyIAMRolePolicy-ssm-params-list-policy",
+            "uniqueId": "ReadOnlyIAMRolePolicy-ssm-params-list-policy"
+          }
+        },
+        "count": "${(var.permissionsLevel == \"Read-Only (Discovery)\") ? 1 : 0}",
+        "name": "ssm-params-list-policy",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = \"ssm:GetParameters*\", \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:ssm:*:*:parameter/*\"}, {\"Action\" = \"ssm:DescribeParameters\", \"Effect\" = \"Allow\", \"Resource\" = \"*\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
+      }
+    },
+    "aws_iam_role_policy_attachment": {
+      "IAMRolePolicyAttachment-arnawsiamawspolicy--AWSCloudFormationReadOnlyAccess": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/IAMRolePolicyAttachment-arn:aws:iam::aws:policy--AWSCloudFormationReadOnlyAccess",
+            "uniqueId": "IAMRolePolicyAttachment-arnawsiamawspolicy--AWSCloudFormationReadOnlyAccess"
+          }
+        },
+        "policy_arn": "arn:aws:iam::aws:policy/AWSCloudFormationReadOnlyAccess",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "IAMRolePolicyAttachment-arnawsiamawspolicy--AWSResourceExplorerReadOnlyAccess": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/IAMRolePolicyAttachment-arn:aws:iam::aws:policy--AWSResourceExplorerReadOnlyAccess",
+            "uniqueId": "IAMRolePolicyAttachment-arnawsiamawspolicy--AWSResourceExplorerReadOnlyAccess"
+          }
+        },
+        "policy_arn": "arn:aws:iam::aws:policy/AWSResourceExplorerReadOnlyAccess",
+        "role": "${aws_iam_role.IAMRole.id}"
+      },
+      "IAMRolePolicyAttachment-arnawsiamawspolicy--SecurityAudit": {
+        "//": {
+          "metadata": {
+            "path": "apono-cross-account-role/IAMRolePolicyAttachment-arn:aws:iam::aws:policy--SecurityAudit",
+            "uniqueId": "IAMRolePolicyAttachment-arnawsiamawspolicy--SecurityAudit"
+          }
+        },
+        "policy_arn": "arn:aws:iam::aws:policy/SecurityAudit",
+        "role": "${aws_iam_role.IAMRole.id}"
+      }
+    }
+  },
+  "terraform": {
+    "required_providers": {
+      "aws": {
+        "source": "aws",
+        "version": "~> 6.0"
+      }
+    }
+  },
+  "variable": {
+    "connectorId": [
+      {
+        "default": "apono-connector",
+        "type": "string"
+      }
+    ],
+    "connectorRoleArn": [
+      {
+        "description": "ARN of the Apono connector IAM role that is trusted to assume the created role",
+        "type": "string"
+      }
+    ],
+    "permissionsLevel": [
+      {
+        "default": "Read-Only (Discovery)",
+        "description": "Account level permissions the connector should have: \"Read-Only (Discovery)\" (discover resources) or \"Full-Access (Manage IAM)\" (discover and manage access).",
+        "type": "string",
+        "validation": [
+          {
+            "condition": "${contains([\"Read-Only (Discovery)\", \"Full-Access (Manage IAM)\"], var.permissionsLevel)}",
+            "error_message": "permissionsLevel must be \"Read-Only (Discovery)\" or \"Full-Access (Manage IAM)\"."
+          }
+        ]
+      }
+    ],
+    "tags": [
+      {
+        "default": {
+        },
+        "description": "Map of tags for the created resources",
+        "type": "map(string)"
+      }
+    ]
+  }
+}

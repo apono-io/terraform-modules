@@ -1,0 +1,16 @@
+{
+  "stacks": {
+    "apono-cross-account-role": {
+      "annotations": [
+      ],
+      "constructPath": "apono-cross-account-role",
+      "dependencies": [
+      ],
+      "name": "apono-cross-account-role",
+      "stackMetadataPath": "stacks/apono-cross-account-role/metadata.json",
+      "synthesizedStackPath": "stacks/apono-cross-account-role/cdk.tf.json",
+      "workingDirectory": "stacks/apono-cross-account-role"
+    }
+  },
+  "version": "0.21.0"
+}

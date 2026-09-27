@@ -157,7 +157,7 @@
             "uniqueId": "IAMRole"
           }
         },
-        "assume_role_policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"1\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"ecs-tasks.amazonaws.com\"},\"Action\":[\"sts:AssumeRole\"],\"Condition\":{\"ArnLike\":{\"aws:SourceArn\":[\"arn:aws:ecs:${data.aws_region.region.name}:${data.aws_caller_identity.caller_identity.account_id}:*\"]},\"StringEquals\":{\"aws:SourceAccount\":[\"${data.aws_caller_identity.caller_identity.account_id}\"]}}}]}",
+        "assume_role_policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"1\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"ecs-tasks.amazonaws.com\"},\"Action\":[\"sts:AssumeRole\",\"sts:TagSession\"],\"Condition\":{\"ArnLike\":{\"aws:SourceArn\":[\"arn:aws:ecs:${data.aws_region.region.name}:${data.aws_caller_identity.caller_identity.account_id}:*\"]},\"StringEquals\":{\"aws:SourceAccount\":[\"${data.aws_caller_identity.caller_identity.account_id}\"]}}}]}",
         "max_session_duration": 3600,
         "name": "${coalesce(var.roleName, \"apono-connector-role-${random_id.stackId.id}\")}",
         "path": "/",
@@ -173,8 +173,19 @@
           }
         },
         "name": "read-secrets-policy",
-        "policy": "{\"Statement\":[{\"Action\":[\"secretsmanager:GetSecretValue\",\"secretsmanager:DescribeSecret\"],\"Effect\":\"Allow\",\"Resource\":[\"${aws_secretsmanager_secret.ECSImageCredentials.arn}\",\"${aws_secretsmanager_secret.AponoTokenSecret.arn}\"]}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"secretsmanager:GetSecretValue\", \"secretsmanager:DescribeSecret\"], \"Effect\" = \"Allow\", \"Resource\" = [aws_secretsmanager_secret.ECSImageCredentials.arn, aws_secretsmanager_secret.AponoTokenSecret.arn]}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.EcsTaskExecutionIAMRole.id}"
+      },
+      "IAMRolePolicy-AponoConnectorLogsRead": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/IAMRolePolicy-AponoConnectorLogsRead",
+            "uniqueId": "IAMRolePolicy-AponoConnectorLogsRead"
+          }
+        },
+        "name": "AponoConnectorLogsRead",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"logs:DescribeLogStreams\", \"logs:GetLogEvents\"], \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:logs:*:*:log-group:/ecs/apono-connector-logs-*:*\", \"Sid\" = \"AllowReadingAponoConnectorLogs\"}], \"Version\" = \"2012-10-17\"})}",
+        "role": "${aws_iam_role.IAMRole.id}"
       },
       "IAMRolePolicy-apono-cloudtrail-logs-s3-access-policy": {
         "//": {
@@ -184,7 +195,7 @@
           }
         },
         "name": "apono-cloudtrail-logs-s3-access-policy",
-        "policy": "{\"Statement\":[{\"Action\":\"s3:GetObject\",\"Effect\":\"Allow\",\"Resource\":\"arn:aws:s3:::aws-cloudtrail-logs-apono-*/*\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = \"s3:GetObject\", \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:s3:::aws-cloudtrail-logs-apono-*/*\"}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.IAMRole.id}"
       },
       "IAMRolePolicy-apono-tagged-keys-access-policy": {
@@ -195,7 +206,7 @@
           }
         },
         "name": "apono-tagged-keys-access-policy",
-        "policy": "{\"Statement\":[{\"Action\":\"kms:Sign\",\"Condition\":{\"StringEquals\":{\"aws:ResourceTag/apono-connector-read\":\"true\"}},\"Effect\":\"Allow\",\"Resource\":\"*\"},{\"Action\":\"kms:Decrypt\",\"Condition\":{\"StringEquals\":{\"aws:ResourceTag/apono-connector-access\":\"true\"}},\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = \"kms:Sign\", \"Condition\" = {\"StringEquals\" = {\"aws:ResourceTag/apono-connector-read\" = \"true\"}}, \"Effect\" = \"Allow\", \"Resource\" = \"*\"}, {\"Action\" = \"kms:Decrypt\", \"Condition\" = {\"StringEquals\" = {\"aws:ResourceTag/apono-connector-access\" = \"true\"}}, \"Effect\" = \"Allow\", \"Resource\" = \"*\"}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.IAMRole.id}"
       },
       "IAMRolePolicy-apono-tagged-lambda-functions-access-policy": {
@@ -206,7 +217,7 @@
           }
         },
         "name": "apono-tagged-lambda-functions-access-policy",
-        "policy": "{\"Statement\":[{\"Action\":[\"lambda:InvokeFunction\",\"lambda:GetFunction\"],\"Condition\":{\"StringEquals\":{\"aws:ResourceTag/apono-connector-access\":\"true\"}},\"Effect\":\"Allow\",\"Resource\":\"arn:aws:lambda:*:*:function:*\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"lambda:InvokeFunction\", \"lambda:GetFunction\"], \"Condition\" = {\"StringEquals\" = {\"aws:ResourceTag/apono-connector-access\" = \"true\"}}, \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:lambda:*:*:function:*\"}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.IAMRole.id}"
       },
       "IAMRolePolicy-apono-tagged-secrets-access-policy": {
@@ -217,7 +228,7 @@
           }
         },
         "name": "apono-tagged-secrets-access-policy",
-        "policy": "{\"Statement\":[{\"Action\":[\"secretsmanager:GetSecretValue\",\"secretsmanager:DescribeSecret\"],\"Condition\":{\"StringEquals\":{\"aws:ResourceTag/apono-connector-read\":\"true\"}},\"Effect\":\"Allow\",\"Resource\":\"arn:aws:secretsmanager:*:*:secret:*\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"secretsmanager:GetSecretValue\", \"secretsmanager:DescribeSecret\"], \"Condition\" = {\"StringEquals\" = {\"aws:ResourceTag/apono-connector-read\" = \"true\"}}, \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:secretsmanager:*:*:secret:*\"}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.IAMRole.id}"
       },
       "IAMRolePolicy-remote-management": {
@@ -228,7 +239,7 @@
           }
         },
         "name": "remote-management",
-        "policy": "{\"Statement\":[{\"Action\":[\"sts:AssumeRole\",\"sts:TagSession\"],\"Effect\":\"Allow\",\"Resource\":\"arn:aws:iam::*:role/apono-*\",\"Sid\":\"assume\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"sts:AssumeRole\", \"sts:TagSession\"], \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:iam::*:role/apono-*\", \"Sid\" = \"assume\"}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.IAMRole.id}"
       }
     },

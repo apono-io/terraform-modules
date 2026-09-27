@@ -1,0 +1,16 @@
+{
+  "stacks": {
+    "apono-management-account-role": {
+      "annotations": [
+      ],
+      "constructPath": "apono-management-account-role",
+      "dependencies": [
+      ],
+      "name": "apono-management-account-role",
+      "stackMetadataPath": "stacks/apono-management-account-role/metadata.json",
+      "synthesizedStackPath": "stacks/apono-management-account-role/cdk.tf.json",
+      "workingDirectory": "stacks/apono-management-account-role"
+    }
+  },
+  "version": "0.21.0"
+}

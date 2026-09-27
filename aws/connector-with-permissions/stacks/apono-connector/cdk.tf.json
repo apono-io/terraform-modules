@@ -157,7 +157,7 @@
             "uniqueId": "IAMRole"
           }
         },
-        "assume_role_policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"1\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"ecs-tasks.amazonaws.com\"},\"Action\":[\"sts:AssumeRole\"],\"Condition\":{\"ArnLike\":{\"aws:SourceArn\":[\"arn:aws:ecs:${data.aws_region.region.name}:${data.aws_caller_identity.caller_identity.account_id}:*\"]},\"StringEquals\":{\"aws:SourceAccount\":[\"${data.aws_caller_identity.caller_identity.account_id}\"]}}}]}",
+        "assume_role_policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"1\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"ecs-tasks.amazonaws.com\"},\"Action\":[\"sts:AssumeRole\",\"sts:TagSession\"],\"Condition\":{\"ArnLike\":{\"aws:SourceArn\":[\"arn:aws:ecs:${data.aws_region.region.name}:${data.aws_caller_identity.caller_identity.account_id}:*\"]},\"StringEquals\":{\"aws:SourceAccount\":[\"${data.aws_caller_identity.caller_identity.account_id}\"]}}}]}",
         "max_session_duration": 3600,
         "name": "${coalesce(var.roleName, \"apono-connector-role-${random_id.stackId.id}\")}",
         "path": "/",
@@ -173,7 +173,7 @@
           }
         },
         "name": "read-secrets-policy",
-        "policy": "{\"Statement\":[{\"Action\":[\"secretsmanager:GetSecretValue\",\"secretsmanager:DescribeSecret\"],\"Effect\":\"Allow\",\"Resource\":[\"${aws_secretsmanager_secret.ECSImageCredentials.arn}\",\"${aws_secretsmanager_secret.AponoTokenSecret.arn}\"]}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"secretsmanager:GetSecretValue\", \"secretsmanager:DescribeSecret\"], \"Effect\" = \"Allow\", \"Resource\" = [aws_secretsmanager_secret.ECSImageCredentials.arn, aws_secretsmanager_secret.AponoTokenSecret.arn]}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.EcsTaskExecutionIAMRole.id}"
       },
       "IAMRolePolicy-AponoConnectorLogsRead": {
@@ -184,7 +184,7 @@
           }
         },
         "name": "AponoConnectorLogsRead",
-        "policy": "{\"Statement\":[{\"Action\":[\"logs:DescribeLogStreams\",\"logs:GetLogEvents\"],\"Effect\":\"Allow\",\"Resource\":\"arn:aws:logs:*:*:log-group:/ecs/apono-connector-logs-*:*\",\"Sid\":\"AllowReadingAponoConnectorLogs\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"logs:DescribeLogStreams\", \"logs:GetLogEvents\"], \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:logs:*:*:log-group:/ecs/apono-connector-logs-*:*\", \"Sid\" = \"AllowReadingAponoConnectorLogs\"}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.IAMRole.id}"
       },
       "IAMRolePolicy-AponoDescribePolicy": {
@@ -195,7 +195,7 @@
           }
         },
         "name": "AponoDescribePolicy",
-        "policy": "{\"Statement\":[{\"Action\":[\"ecr:GetLifecyclePolicy\",\"lambda:Get*\",\"s3:ListBucket\",\"sns:GetSubscriptionAttributes\",\"dynamodb:ListTagsOfResource\",\"sns:ListTagsForResource\",\"es:ListTags\",\"rds:DescribeDBClusters\"],\"Effect\":\"Allow\",\"Resource\":\"*\",\"Sid\":\"AllowDescribingResources\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"ecr:GetLifecyclePolicy\", \"lambda:Get*\", \"s3:ListBucket\", \"sns:GetSubscriptionAttributes\", \"dynamodb:ListTagsOfResource\", \"sns:ListTagsForResource\", \"es:ListTags\", \"rds:DescribeDBClusters\"], \"Effect\" = \"Allow\", \"Resource\" = \"*\", \"Sid\" = \"AllowDescribingResources\"}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.IAMRole.id}"
       },
       "IAMRolePolicy-account-access-policy": {
@@ -206,7 +206,7 @@
           }
         },
         "name": "account-access-policy",
-        "policy": "{\"Statement\":[{\"Action\":[\"account-access:ListApplications\",\"account-access:GetApplication\",\"account-access:ListEntitlements\",\"account-access:GetEntitlement\",\"account-access:CreateEntitlement\",\"account-access:DeleteEntitlement\",\"account-access:ListTagsForResource\",\"account-access:TagResource\",\"account-access:UntagResource\"],\"Effect\":\"Allow\",\"Resource\":\"*\",\"Sid\":\"accountAccess0\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"account-access:ListApplications\", \"account-access:GetApplication\", \"account-access:ListEntitlements\", \"account-access:GetEntitlement\", \"account-access:CreateEntitlement\", \"account-access:DeleteEntitlement\", \"account-access:ListTagsForResource\", \"account-access:TagResource\", \"account-access:UntagResource\"], \"Effect\" = \"Allow\", \"Resource\" = \"*\", \"Sid\" = \"accountAccess0\"}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.IAMRole.id}"
       },
       "IAMRolePolicy-apono-cloudtrail-logs-s3-access-policy": {
@@ -217,7 +217,7 @@
           }
         },
         "name": "apono-cloudtrail-logs-s3-access-policy",
-        "policy": "{\"Statement\":[{\"Action\":\"s3:GetObject\",\"Effect\":\"Allow\",\"Resource\":\"arn:aws:s3:::aws-cloudtrail-logs-apono-*/*\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = \"s3:GetObject\", \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:s3:::aws-cloudtrail-logs-apono-*/*\"}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.IAMRole.id}"
       },
       "IAMRolePolicy-apono-ec2-instance-user": {
@@ -228,7 +228,7 @@
           }
         },
         "name": "apono-ec2-instance-user",
-        "policy": "{\"Statement\":[{\"Action\":\"ssm:SendCommand\",\"Effect\":\"Allow\",\"Resource\":[\"arn:aws:ssm:*:*:document/AWSFleetManager-CreateUser\",\"arn:aws:ssm:*:*:document/AWSFleetManager-CreateGroup\",\"arn:aws:ssm:*:*:document/AWSFleetManager-AddUsersToGroups\",\"arn:aws:ssm:*:*:document/AWSFleetManager-RemoveUsersFromGroups\",\"arn:aws:ssm:*:*:document/AWSFleetManager-DeleteUser\",\"arn:aws:ec2:*:*:instance/*\"]},{\"Action\":\"ssm:GetCommandInvocation\",\"Effect\":\"Allow\",\"Resource\":\"*\"},{\"Action\":[\"ssm:CreateDocument\",\"ssm:DeleteDocument\",\"ssm:AddTagsToResource\",\"ssm:RemoveTagsFromResource\"],\"Effect\":\"Allow\",\"Resource\":\"arn:aws:ssm:*:*:document/Apono-Connect-*\"},{\"Action\":\"ssm:TerminateSession\",\"Effect\":\"Allow\",\"Resource\":\"arn:aws:ssm:*:*:session/*\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = \"ssm:SendCommand\", \"Effect\" = \"Allow\", \"Resource\" = [\"arn:aws:ssm:*:*:document/AWSFleetManager-CreateUser\", \"arn:aws:ssm:*:*:document/AWSFleetManager-CreateGroup\", \"arn:aws:ssm:*:*:document/AWSFleetManager-AddUsersToGroups\", \"arn:aws:ssm:*:*:document/AWSFleetManager-RemoveUsersFromGroups\", \"arn:aws:ssm:*:*:document/AWSFleetManager-DeleteUser\", \"arn:aws:ec2:*:*:instance/*\"]}, {\"Action\" = \"ssm:GetCommandInvocation\", \"Effect\" = \"Allow\", \"Resource\" = \"*\"}, {\"Action\" = [\"ssm:CreateDocument\", \"ssm:DeleteDocument\", \"ssm:AddTagsToResource\", \"ssm:RemoveTagsFromResource\"], \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:ssm:*:*:document/Apono-Connect-*\"}, {\"Action\" = \"ssm:TerminateSession\", \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:ssm:*:*:session/*\"}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.IAMRole.id}"
       },
       "IAMRolePolicy-apono-tagged-keys-access-policy": {
@@ -239,7 +239,7 @@
           }
         },
         "name": "apono-tagged-keys-access-policy",
-        "policy": "{\"Statement\":[{\"Action\":\"kms:Sign\",\"Condition\":{\"StringEquals\":{\"aws:ResourceTag/apono-connector-read\":\"true\"}},\"Effect\":\"Allow\",\"Resource\":\"*\"},{\"Action\":\"kms:Decrypt\",\"Condition\":{\"StringEquals\":{\"aws:ResourceTag/apono-connector-access\":\"true\"}},\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = \"kms:Sign\", \"Condition\" = {\"StringEquals\" = {\"aws:ResourceTag/apono-connector-read\" = \"true\"}}, \"Effect\" = \"Allow\", \"Resource\" = \"*\"}, {\"Action\" = \"kms:Decrypt\", \"Condition\" = {\"StringEquals\" = {\"aws:ResourceTag/apono-connector-access\" = \"true\"}}, \"Effect\" = \"Allow\", \"Resource\" = \"*\"}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.IAMRole.id}"
       },
       "IAMRolePolicy-apono-tagged-lambda-functions-access-policy": {
@@ -250,7 +250,7 @@
           }
         },
         "name": "apono-tagged-lambda-functions-access-policy",
-        "policy": "{\"Statement\":[{\"Action\":[\"lambda:InvokeFunction\",\"lambda:GetFunction\"],\"Condition\":{\"StringEquals\":{\"aws:ResourceTag/apono-connector-access\":\"true\"}},\"Effect\":\"Allow\",\"Resource\":\"arn:aws:lambda:*:*:function:*\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"lambda:InvokeFunction\", \"lambda:GetFunction\"], \"Condition\" = {\"StringEquals\" = {\"aws:ResourceTag/apono-connector-access\" = \"true\"}}, \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:lambda:*:*:function:*\"}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.IAMRole.id}"
       },
       "IAMRolePolicy-apono-tagged-secrets-access-policy": {
@@ -261,7 +261,7 @@
           }
         },
         "name": "apono-tagged-secrets-access-policy",
-        "policy": "{\"Statement\":[{\"Action\":[\"secretsmanager:GetSecretValue\",\"secretsmanager:DescribeSecret\"],\"Condition\":{\"StringEquals\":{\"aws:ResourceTag/apono-connector-read\":\"true\"}},\"Effect\":\"Allow\",\"Resource\":\"arn:aws:secretsmanager:*:*:secret:*\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"secretsmanager:GetSecretValue\", \"secretsmanager:DescribeSecret\"], \"Condition\" = {\"StringEquals\" = {\"aws:ResourceTag/apono-connector-read\" = \"true\"}}, \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:secretsmanager:*:*:secret:*\"}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.IAMRole.id}"
       },
       "IAMRolePolicy-ec2-policy": {
@@ -272,7 +272,7 @@
           }
         },
         "name": "ec2-policy",
-        "policy": "{\"Statement\":[{\"Action\":[\"ec2:DescribeInstances\",\"ec2:DescribeTags\"],\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"ec2:DescribeInstances\", \"ec2:DescribeTags\"], \"Effect\" = \"Allow\", \"Resource\" = \"*\"}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.IAMRole.id}"
       },
       "IAMRolePolicy-ecr-policy": {
@@ -283,7 +283,7 @@
           }
         },
         "name": "ecr-policy",
-        "policy": "{\"Statement\":[{\"Action\":[\"ecr:DescribeImages\",\"ecr:DescribeRepositories\"],\"Effect\":\"Allow\",\"Resource\":\"*\",\"Sid\":\"assume\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"ecr:DescribeImages\", \"ecr:DescribeRepositories\"], \"Effect\" = \"Allow\", \"Resource\" = \"*\", \"Sid\" = \"assume\"}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.IAMRole.id}"
       },
       "IAMRolePolicy-eks-read-policy": {
@@ -294,7 +294,7 @@
           }
         },
         "name": "eks-read-policy",
-        "policy": "{\"Statement\":[{\"Action\":[\"eks:AccessKubernetesApi\",\"eks:ListTagsForResource\",\"eks:ListAccessEntries\",\"eks:DescribeAccessEntry\",\"eks:ListAssociatedAccessPolicies\",\"eks:DescribeCluster\",\"eks:ListAccessPolicies\",\"eks:ListClusters\"],\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"eks:AccessKubernetesApi\", \"eks:ListTagsForResource\", \"eks:ListAccessEntries\", \"eks:DescribeAccessEntry\", \"eks:ListAssociatedAccessPolicies\", \"eks:DescribeCluster\", \"eks:ListAccessPolicies\", \"eks:ListClusters\"], \"Effect\" = \"Allow\", \"Resource\" = \"*\"}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.IAMRole.id}"
       },
       "IAMRolePolicy-eks-write-policy": {
@@ -305,7 +305,7 @@
           }
         },
         "name": "eks-write-policy",
-        "policy": "{\"Statement\":[{\"Action\":[\"eks:DeleteAccessEntry\",\"eks:UntagResource\",\"eks:AssociateAccessPolicy\",\"eks:DisassociateAccessPolicy\",\"eks:TagResource\",\"eks:CreateAccessEntry\",\"eks:UpdateAccessEntry\"],\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"eks:DeleteAccessEntry\", \"eks:UntagResource\", \"eks:AssociateAccessPolicy\", \"eks:DisassociateAccessPolicy\", \"eks:TagResource\", \"eks:CreateAccessEntry\", \"eks:UpdateAccessEntry\"], \"Effect\" = \"Allow\", \"Resource\" = \"*\"}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.IAMRole.id}"
       },
       "IAMRolePolicy-iam-access-policy": {
@@ -316,7 +316,7 @@
           }
         },
         "name": "iam-access-policy",
-        "policy": "{\"Statement\":[{\"Action\":[\"iam:ListPolicies\",\"iam:CreateInstanceProfile\",\"iam:ListGroups\",\"iam:ListInstanceProfiles\",\"iam:ListRoles\"],\"Effect\":\"Allow\",\"Resource\":\"*\"},{\"Action\":[\"iam:CreateInstanceProfile\",\"iam:GetRole\",\"iam:UpdateAssumeRolePolicy\",\"iam:ListRoleTags\",\"iam:TagRole\",\"iam:UntagRole\",\"iam:CreateRole\",\"iam:DeleteRole\",\"iam:AttachRolePolicy\",\"iam:PutRolePolicy\",\"iam:AddRoleToInstanceProfile\",\"iam:ListInstanceProfilesForRole\",\"iam:DetachRolePolicy\",\"iam:ListAttachedRolePolicies\",\"iam:DeleteRolePolicy\",\"iam:ListAttachedGroupPolicies\",\"iam:ListRolePolicies\",\"iam:GetRolePolicy\",\"iam:PassRole\",\"iam:GetInstanceProfile\",\"iam:CreateUser\",\"iam:CreateAccessKey\",\"iam:DeleteAccessKey\",\"iam:PutUserPolicy\",\"iam:DeleteUserPolicy\",\"iam:GetUser\",\"iam:GetUserPolicy\",\"iam:DeleteUser\",\"iam:ListAttachedUserPolicies\",\"iam:ListUserPolicies\",\"iam:UpdateLoginProfile\",\"iam:ListAccessKeys\",\"iam:AttachUserPolicy\",\"iam:DetachUserPolicy\",\"iam:CreateLoginProfile\",\"iam:CreateServiceLinkedRole\",\"iam:GetPolicy\",\"iam:GetPolicyVersion\",\"iam:ListGroupPolicies\",\"iam:GetGroupPolicy\",\"iam:PutRolePermissionsBoundary\",\"iam:DeleteRolePermissionsBoundary\",\"iam:PutUserPermissionsBoundary\",\"iam:DeleteUserPermissionsBoundary\",\"iam:TagUser\",\"iam:ListUserTags\",\"iam:UpdateRole\",\"iam:CreatePolicy\",\"iam:DeletePolicy\",\"iam:CreatePolicyVersion\",\"iam:ListPolicyVersions\",\"iam:DeletePolicyVersion\",\"iam:TagPolicy\"],\"Effect\":\"Allow\",\"Resource\":[\"arn:aws:iam::*:instance-profile/*\",\"arn:aws:iam::*:role/*\",\"arn:aws:iam::*:group/*\",\"arn:aws:iam::*:user/*\",\"arn:aws:iam::*:policy/*\"]}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"iam:ListPolicies\", \"iam:CreateInstanceProfile\", \"iam:ListGroups\", \"iam:ListInstanceProfiles\", \"iam:ListRoles\"], \"Effect\" = \"Allow\", \"Resource\" = \"*\"}, {\"Action\" = [\"iam:CreateInstanceProfile\", \"iam:GetRole\", \"iam:UpdateAssumeRolePolicy\", \"iam:ListRoleTags\", \"iam:TagRole\", \"iam:UntagRole\", \"iam:CreateRole\", \"iam:DeleteRole\", \"iam:AttachRolePolicy\", \"iam:PutRolePolicy\", \"iam:AddRoleToInstanceProfile\", \"iam:ListInstanceProfilesForRole\", \"iam:DetachRolePolicy\", \"iam:ListAttachedRolePolicies\", \"iam:DeleteRolePolicy\", \"iam:ListAttachedGroupPolicies\", \"iam:ListRolePolicies\", \"iam:GetRolePolicy\", \"iam:PassRole\", \"iam:GetInstanceProfile\", \"iam:CreateUser\", \"iam:CreateAccessKey\", \"iam:DeleteAccessKey\", \"iam:PutUserPolicy\", \"iam:DeleteUserPolicy\", \"iam:GetUser\", \"iam:GetUserPolicy\", \"iam:DeleteUser\", \"iam:ListAttachedUserPolicies\", \"iam:ListUserPolicies\", \"iam:UpdateLoginProfile\", \"iam:ListAccessKeys\", \"iam:AttachUserPolicy\", \"iam:DetachUserPolicy\", \"iam:CreateLoginProfile\", \"iam:CreateServiceLinkedRole\", \"iam:GetPolicy\", \"iam:GetPolicyVersion\", \"iam:ListGroupPolicies\", \"iam:GetGroupPolicy\", \"iam:PutRolePermissionsBoundary\", \"iam:DeleteRolePermissionsBoundary\", \"iam:PutUserPermissionsBoundary\", \"iam:DeleteUserPermissionsBoundary\", \"iam:TagUser\", \"iam:ListUserTags\", \"iam:UpdateRole\", \"iam:CreatePolicy\", \"iam:DeletePolicy\", \"iam:CreatePolicyVersion\", \"iam:ListPolicyVersions\", \"iam:DeletePolicyVersion\", \"iam:TagPolicy\"], \"Effect\" = \"Allow\", \"Resource\" = [\"arn:aws:iam::*:instance-profile/*\", \"arn:aws:iam::*:role/*\", \"arn:aws:iam::*:group/*\", \"arn:aws:iam::*:user/*\", \"arn:aws:iam::*:policy/*\"]}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.IAMRole.id}"
       },
       "IAMRolePolicy-rds-connect": {
@@ -327,7 +327,7 @@
           }
         },
         "name": "rds-connect",
-        "policy": "{\"Statement\":[{\"Action\":\"rds-db:connect\",\"Effect\":\"Allow\",\"Resource\":\"arn:aws:rds-db:*:*:dbuser:*/apono_connector\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = \"rds-db:connect\", \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:rds-db:*:*:dbuser:*/apono_connector\"}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.IAMRole.id}"
       },
       "IAMRolePolicy-rds-list-policy": {
@@ -338,7 +338,7 @@
           }
         },
         "name": "rds-list-policy",
-        "policy": "{\"Statement\":[{\"Action\":[\"rds:DescribeDBInstances\",\"rds:ListTagsForResource\"],\"Effect\":\"Allow\",\"Resource\":\"arn:aws:rds:*:*:db:*\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"rds:DescribeDBInstances\", \"rds:ListTagsForResource\"], \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:rds:*:*:db:*\"}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.IAMRole.id}"
       },
       "IAMRolePolicy-read-resource-tags-policy": {
@@ -349,7 +349,7 @@
           }
         },
         "name": "read-resource-tags-policy",
-        "policy": "{\"Statement\":[{\"Action\":\"tag:GetResources\",\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = \"tag:GetResources\", \"Effect\" = \"Allow\", \"Resource\" = \"*\"}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.IAMRole.id}"
       },
       "IAMRolePolicy-remote-management": {
@@ -360,7 +360,7 @@
           }
         },
         "name": "remote-management",
-        "policy": "{\"Statement\":[{\"Action\":[\"sts:AssumeRole\",\"sts:TagSession\"],\"Effect\":\"Allow\",\"Resource\":\"arn:aws:iam::*:role/apono-*\",\"Sid\":\"assume\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"sts:AssumeRole\", \"sts:TagSession\"], \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:iam::*:role/apono-*\", \"Sid\" = \"assume\"}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.IAMRole.id}"
       },
       "IAMRolePolicy-s3-list-policy": {
@@ -371,7 +371,7 @@
           }
         },
         "name": "s3-list-policy",
-        "policy": "{\"Statement\":[{\"Action\":[\"s3:GetBucketTagging\",\"s3:ListAllMyBuckets\",\"s3:ListBucket\",\"s3:GetBucketLocation\"],\"Effect\":\"Allow\",\"Resource\":\"arn:aws:s3:::*\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"s3:GetBucketTagging\", \"s3:ListAllMyBuckets\", \"s3:ListBucket\", \"s3:GetBucketLocation\"], \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:s3:::*\"}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.IAMRole.id}"
       },
       "IAMRolePolicy-ssm-params-list-policy": {
@@ -382,7 +382,7 @@
           }
         },
         "name": "ssm-params-list-policy",
-        "policy": "{\"Statement\":[{\"Action\":\"ssm:GetParameters*\",\"Effect\":\"Allow\",\"Resource\":\"arn:aws:ssm:*:*:parameter/*\"},{\"Action\":\"ssm:DescribeParameters\",\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = \"ssm:GetParameters*\", \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:ssm:*:*:parameter/*\"}, {\"Action\" = \"ssm:DescribeParameters\", \"Effect\" = \"Allow\", \"Resource\" = \"*\"}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.IAMRole.id}"
       },
       "IAMRolePolicy-sso-policy": {
@@ -393,7 +393,7 @@
           }
         },
         "name": "sso-policy",
-        "policy": "{\"Statement\":[{\"Action\":[\"organizations:ListAccounts\",\"tag:GetResources\",\"tag:GetTagValues\",\"sso:ListInstances\",\"identitystore:*\",\"tag:GetTagKeys\",\"sso:TagResource\",\"sso:UntagResource\",\"sso-directory:SearchUsers\"],\"Effect\":\"Allow\",\"Resource\":\"*\",\"Sid\":\"sso0\"},{\"Action\":[\"organizations:ListAccountsForParent\",\"sso:ListPermissionSets\",\"sso:CreateAccountAssignment\",\"sso:DescribeAccountAssignmentCreationStatus\",\"organizations:ListParents\",\"sso:DeleteAccountAssignment\",\"sso:DescribePermissionSet\",\"organizations:ListChildren\",\"sso:DescribeAccountAssignmentDeletionStatus\",\"sso:DeletePermissionSet\",\"sso:CreatePermissionSet\",\"sso:PutInlinePolicyToPermissionSet\",\"iam:CreateSAMLProvider\",\"iam:UpdateSAMLProvider\",\"iam:GetSAMLProvider\",\"sso:GetInlinePolicyForPermissionSet\",\"sso:DeleteInlinePolicyFromPermissionSet\",\"sso:ProvisionPermissionSet\",\"sso:AttachManagedPolicyToPermissionSet\",\"sso:DetachManagedPolicyFromPermissionSet\",\"sso:ListManagedPoliciesInPermissionSet\",\"sso:ListCustomerManagedPolicyReferencesInPermissionSet\",\"sso:AttachCustomerManagedPolicyReferenceToPermissionSet\",\"sso:DetachCustomerManagedPolicyReferenceFromPermissionSet\",\"sso:DescribePermissionSetProvisioningStatus\",\"sso:GetPermissionsBoundaryForPermissionSet\",\"sso:PutPermissionsBoundaryToPermissionSet\",\"sso:DeletePermissionsBoundaryFromPermissionSet\"],\"Effect\":\"Allow\",\"Resource\":[\"arn:aws:organizations::*:root/o-*/r-*\",\"arn:aws:organizations::*:ou/o-*/ou-*\",\"arn:aws:sso:::instance/*\",\"arn:aws:sso:::permissionSet/*/*\",\"arn:aws:sso:::account/*\",\"arn:aws:iam::*:saml-provider/*\"],\"Sid\":\"sso1\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"organizations:ListAccounts\", \"tag:GetResources\", \"tag:GetTagValues\", \"sso:ListInstances\", \"identitystore:GetUserId\", \"identitystore:DescribeUser\", \"identitystore:DescribeGroup\", \"identitystore:ListGroupMemberships\", \"identitystore:ListGroupMembershipsForMember\", \"tag:GetTagKeys\", \"sso:TagResource\", \"sso:UntagResource\", \"sso-directory:SearchUsers\"], \"Effect\" = \"Allow\", \"Resource\" = \"*\", \"Sid\" = \"sso0\"}, {\"Action\" = [\"organizations:ListAccountsForParent\", \"sso:ListPermissionSets\", \"sso:CreateAccountAssignment\", \"sso:DescribeAccountAssignmentCreationStatus\", \"organizations:ListParents\", \"sso:DeleteAccountAssignment\", \"sso:DescribePermissionSet\", \"organizations:ListChildren\", \"sso:DescribeAccountAssignmentDeletionStatus\", \"sso:DeletePermissionSet\", \"sso:CreatePermissionSet\", \"sso:PutInlinePolicyToPermissionSet\", \"iam:CreateSAMLProvider\", \"iam:UpdateSAMLProvider\", \"iam:GetSAMLProvider\", \"sso:GetInlinePolicyForPermissionSet\", \"sso:DeleteInlinePolicyFromPermissionSet\", \"sso:ProvisionPermissionSet\", \"sso:AttachManagedPolicyToPermissionSet\", \"sso:DetachManagedPolicyFromPermissionSet\", \"sso:ListManagedPoliciesInPermissionSet\", \"sso:ListCustomerManagedPolicyReferencesInPermissionSet\", \"sso:AttachCustomerManagedPolicyReferenceToPermissionSet\", \"sso:DetachCustomerManagedPolicyReferenceFromPermissionSet\", \"sso:DescribePermissionSetProvisioningStatus\", \"sso:GetPermissionsBoundaryForPermissionSet\", \"sso:PutPermissionsBoundaryToPermissionSet\", \"sso:DeletePermissionsBoundaryFromPermissionSet\"], \"Effect\" = \"Allow\", \"Resource\" = [\"arn:aws:organizations::*:root/o-*/r-*\", \"arn:aws:organizations::*:ou/o-*/ou-*\", \"arn:aws:sso:::instance/*\", \"arn:aws:sso:::permissionSet/*/*\", \"arn:aws:iam::*:saml-provider/*\"], \"Sid\" = \"sso1\"}, {\"Action\" = [\"sso:CreateAccountAssignment\", \"sso:DeleteAccountAssignment\", \"sso:ProvisionPermissionSet\"], \"Effect\" = \"Allow\", \"Resource\" = [\"arn:aws:sso:::account/*\"], \"Sid\" = \"sso2\"}, {\"Action\" = [\"iam:AttachRolePolicy\", \"iam:CreateRole\", \"iam:DeleteRolePermissionsBoundary\", \"iam:PutRolePermissionsBoundary\", \"iam:PutRolePolicy\", \"iam:UpdateRole\", \"iam:UpdateRoleDescription\", \"iam:UpdateAssumeRolePolicy\"], \"Effect\" = \"Allow\", \"Resource\" = \"arn:aws:iam::*:role/aws-reserved/sso.amazonaws.com/*\", \"Sid\" = \"sso3\"}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.IAMRole.id}"
       }
     },
