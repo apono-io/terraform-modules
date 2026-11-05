@@ -2,6 +2,11 @@
   "//": {
     "metadata": {
       "backend": "local",
+      "overrides": {
+        "stack": [
+          "terraform"
+        ]
+      },
       "stackName": "apono-connector",
       "version": "0.21.0"
     },
@@ -92,6 +97,12 @@
           }
         },
         "cluster": "${aws_ecs_cluster.ECSCluster.arn}",
+        "depends_on": [
+          "aws_iam_role_policy.EcsTaskExecutionIAMRolePolicy",
+          "aws_secretsmanager_secret_version.ECSImageCredentialsVersion",
+          "aws_secretsmanager_secret_version.AponoTokenSecretVersion",
+          "aws_secretsmanager_secret_version.OnepasswordConfigSecretVersion"
+        ],
         "deployment_circuit_breaker": {
           "enable": false,
           "rollback": false
@@ -123,7 +134,7 @@
             "uniqueId": "ECSTaskDefinition"
           }
         },
-        "container_definitions": "[{\"name\":\"apono-connector\",\"image\":\"registry.apono.io/apono-connector:v1.8.9\",\"repositoryCredentials\":{\"credentialsParameter\":\"${aws_secretsmanager_secret.ECSImageCredentials.arn}\"},\"cpu\":null,\"memory\":null,\"memoryReservation\":null,\"links\":[],\"portMappings\":[],\"essential\":true,\"entryPoint\":[],\"command\":[],\"environment\":[{\"name\":\"APONO_CONNECTOR_ID\",\"value\":\"${var.connectorId}\"},{\"name\":\"APONO_URL\",\"value\":\"api.apono.io\"},{\"name\":\"TEMPLATES_PATH\",\"value\":\"/app/apono-agent-templates\"}],\"environmentFiles\":[],\"mountPoints\":[],\"volumesFrom\":[],\"linuxParameters\":null,\"secrets\":[{\"name\":\"APONO_TOKEN\",\"valueFrom\":\"${aws_secretsmanager_secret.AponoTokenSecret.arn}\"}],\"dependsOn\":[],\"startTimeout\":null,\"stopTimeout\":null,\"hostname\":null,\"user\":null,\"workingDirectory\":null,\"disableNetworking\":null,\"privileged\":null,\"readonlyRootFilesystem\":null,\"dnsServers\":[],\"dnsSearchDomains\":[],\"extraHosts\":[],\"dockerSecurityOptions\":[],\"interactive\":null,\"pseudoTerminal\":null,\"dockerLabels\":null,\"ulimits\":[],\"logConfiguration\":{\"logDriver\":\"awslogs\",\"options\":{\"awslogs-group\":\"${aws_cloudwatch_log_group.LogsLogGroup.name}\",\"awslogs-region\":\"${data.aws_region.region.name}\",\"awslogs-stream-prefix\":\"ecs\"},\"secretOptions\":[]},\"healthCheck\":{\"command\":[\"CMD-SHELL\",\"wget -q -O- http://localhost:8080/healthz\"],\"interval\":30,\"timeout\":5,\"retries\":3,\"startPeriod\":30},\"systemControls\":[],\"resourceRequirements\":[],\"firelensConfiguration\":null}]",
+        "container_definitions": "${jsonencode([{\"name\" = \"apono-connector\", \"image\" = \"registry.apono.io/apono-connector:v1.8.9\", \"repositoryCredentials\" = {\"credentialsParameter\" = aws_secretsmanager_secret.ECSImageCredentials.arn}, \"links\" = [], \"portMappings\" = [], \"essential\" = true, \"entryPoint\" = [], \"command\" = [], \"environment\" = [{\"name\" = \"APONO_CONNECTOR_ID\", \"value\" = var.connectorId}, {\"name\" = \"APONO_URL\", \"value\" = \"api.apono.io\"}, {\"name\" = \"TEMPLATES_PATH\", \"value\" = \"/app/apono-agent-templates\"}], \"environmentFiles\" = [], \"mountPoints\" = [], \"volumesFrom\" = [], \"secrets\" = (length(join(\"\", aws_secretsmanager_secret.OnepasswordConfigSecret[*].arn)) >= 1) ? [{\"name\" = \"APONO_TOKEN\", \"valueFrom\" = aws_secretsmanager_secret.AponoTokenSecret.arn}, {\"name\" = \"ONEPASSWORD_CONFIG\", \"valueFrom\" = join(\"\", aws_secretsmanager_secret.OnepasswordConfigSecret[*].arn)}] : [{\"name\" = \"APONO_TOKEN\", \"valueFrom\" = aws_secretsmanager_secret.AponoTokenSecret.arn}], \"dependsOn\" = [], \"dnsServers\" = [], \"dnsSearchDomains\" = [], \"extraHosts\" = [], \"dockerSecurityOptions\" = [], \"ulimits\" = [], \"logConfiguration\" = {\"logDriver\" = \"awslogs\", \"options\" = {\"awslogs-group\" = aws_cloudwatch_log_group.LogsLogGroup.name, \"awslogs-region\" = data.aws_region.region.name, \"awslogs-stream-prefix\" = \"ecs\"}, \"secretOptions\" = []}, \"healthCheck\" = {\"command\" = [\"CMD-SHELL\", \"wget -q -O- http://localhost:8080/healthz\"], \"interval\" = 30, \"timeout\" = 5, \"retries\" = 3, \"startPeriod\" = 30}, \"systemControls\" = [], \"resourceRequirements\" = []}])}",
         "cpu": "1024",
         "execution_role_arn": "${aws_iam_role.EcsTaskExecutionIAMRole.arn}",
         "family": "connector-task-definition-${random_id.stackId.id}",
@@ -173,7 +184,7 @@
           }
         },
         "name": "read-secrets-policy",
-        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"secretsmanager:GetSecretValue\", \"secretsmanager:DescribeSecret\"], \"Effect\" = \"Allow\", \"Resource\" = [aws_secretsmanager_secret.ECSImageCredentials.arn, aws_secretsmanager_secret.AponoTokenSecret.arn]}], \"Version\" = \"2012-10-17\"})}",
+        "policy": "${jsonencode({\"Statement\" = [{\"Action\" = [\"secretsmanager:GetSecretValue\", \"secretsmanager:DescribeSecret\"], \"Effect\" = \"Allow\", \"Resource\" = (length(join(\"\", aws_secretsmanager_secret.OnepasswordConfigSecret[*].arn)) >= 1) ? [aws_secretsmanager_secret.ECSImageCredentials.arn, aws_secretsmanager_secret.AponoTokenSecret.arn, join(\"\", aws_secretsmanager_secret.OnepasswordConfigSecret[*].arn)] : [aws_secretsmanager_secret.ECSImageCredentials.arn, aws_secretsmanager_secret.AponoTokenSecret.arn]}], \"Version\" = \"2012-10-17\"})}",
         "role": "${aws_iam_role.EcsTaskExecutionIAMRole.id}"
       },
       "IAMRolePolicy-AponoConnectorLogsRead": {
@@ -277,6 +288,19 @@
         "description": "Apono Connector docker registry credentials",
         "name": "apono-connector-registry-credentials-${random_id.stackId.id}",
         "tags": "${var.tags}"
+      },
+      "OnepasswordConfigSecret": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/OnepasswordConfigSecret",
+            "uniqueId": "OnepasswordConfigSecret"
+          }
+        },
+        "count": "${nonsensitive((length(var.onepasswordToken) >= 1)) ? 1 : 0}",
+        "description": "Apono Connector 1Password configuration",
+        "name": "apono-connector-onepassword-config-${random_id.stackId.id}",
+        "recovery_window_in_days": 0,
+        "tags": "${var.tags}"
       }
     },
     "aws_secretsmanager_secret_version": {
@@ -288,7 +312,8 @@
           }
         },
         "secret_id": "${aws_secretsmanager_secret.AponoTokenSecret.id}",
-        "secret_string": "${var.aponoToken}"
+        "secret_string_wo": "${var.aponoToken}",
+        "secret_string_wo_version": "${parseint(substr(sha256(var.aponoToken), 0, 8), 16)}"
       },
       "ECSImageCredentialsVersion": {
         "//": {
@@ -298,7 +323,20 @@
           }
         },
         "secret_id": "${aws_secretsmanager_secret.ECSImageCredentials.id}",
-        "secret_string": "{\"username\": \"apono\", \"password\": \"${var.aponoToken}\"}"
+        "secret_string_wo": "${jsonencode({\"username\" = \"apono\", \"password\" = var.aponoToken})}",
+        "secret_string_wo_version": "${parseint(substr(sha256(jsonencode({\"username\" = \"apono\", \"password\" = var.aponoToken})), 0, 8), 16)}"
+      },
+      "OnepasswordConfigSecretVersion": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/OnepasswordConfigSecretVersion",
+            "uniqueId": "OnepasswordConfigSecretVersion"
+          }
+        },
+        "count": "${nonsensitive((length(var.onepasswordToken) >= 1)) ? 1 : 0}",
+        "secret_id": "${join(\"\", aws_secretsmanager_secret.OnepasswordConfigSecret[*].id)}",
+        "secret_string_wo": "${jsonencode({\"token\" = var.onepasswordToken})}",
+        "secret_string_wo_version": "${parseint(substr(sha256(jsonencode({\"token\" = var.onepasswordToken})), 0, 8), 16)}"
       }
     },
     "aws_security_group": {
@@ -351,11 +389,13 @@
         "source": "hashicorp/random",
         "version": "~> 3.1"
       }
-    }
+    },
+    "required_version": ">= 1.11"
   },
   "variable": {
     "aponoToken": [
       {
+        "sensitive": true,
         "type": "string"
       }
     ],
@@ -384,6 +424,15 @@
         "default": 1,
         "description": "Number of connector instances",
         "type": "number"
+      }
+    ],
+    "onepasswordToken": [
+      {
+        "default": "",
+        "description": "Optional 1Password service account token. When provided, it is stored in AWS Secrets Manager as a write-only value (never saved in Terraform state) and injected into the connector as the ONEPASSWORD_CONFIG environment variable. A changed token takes effect when the connector task next restarts. The value must be known at plan time (a variable or data source, not an attribute of a resource created in the same apply)",
+        "nullable": false,
+        "sensitive": true,
+        "type": "string"
       }
     ],
     "roleName": [
