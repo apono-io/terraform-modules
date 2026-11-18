@@ -21,6 +21,17 @@
     }
   },
   "data": {
+    "azuread_service_principal": {
+      "microsoftGraph": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/microsoftGraph",
+            "uniqueId": "microsoftGraph"
+          }
+        },
+        "client_id": "00000003-0000-0000-c000-000000000000"
+      }
+    },
     "azurerm_resource_group": {
       "azureResourceGroup": {
         "//": {
@@ -52,6 +63,19 @@
     }
   },
   "resource": {
+    "azuread_app_role_assignment": {
+      "graphAppRoleAssignment_ApplicationReadWriteAll": {
+        "//": {
+          "metadata": {
+            "path": "apono-connector/graphAppRoleAssignment_Application.ReadWrite.All",
+            "uniqueId": "graphAppRoleAssignment_ApplicationReadWriteAll"
+          }
+        },
+        "app_role_id": "${data.azuread_service_principal.microsoftGraph.app_role_ids[\"Application.ReadWrite.All\"]}",
+        "principal_object_id": "${azurerm_container_group.container.identity[0].principal_id}",
+        "resource_object_id": "${data.azuread_service_principal.microsoftGraph.object_id}"
+      }
+    },
     "azuread_directory_role": {
       "azureAdRole": {
         "//": {
